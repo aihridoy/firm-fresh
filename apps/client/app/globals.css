@@ -2,8 +2,6 @@
 @variant dark (&:where([class="dark"], [class="dark"] *));
 
 @theme {
-  --color-background: var(--background);
-  --color-text: var(--text);
   --color-primary-50: #f0fdf4;
   --color-primary-100: #dcfce7;
   --color-primary-500: #22c55e;

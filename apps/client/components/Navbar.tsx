@@ -33,12 +33,12 @@ export default function Navbar() {
             >
               Home
             </Link>
-            <a
+            <Link
               href="/products"
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
             >
               Products
-            </a>
+            </Link>
             <a
               href="/farmers"
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"

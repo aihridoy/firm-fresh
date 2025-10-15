@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
 import Newsletter from "@/components/Newsletter";
+import ReviewModal from "@/components/ReviewModal";
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       <FeaturedProducts />
       <Choose />
       <Newsletter />
+      <ReviewModal />
       <Footer />
     </>
   );

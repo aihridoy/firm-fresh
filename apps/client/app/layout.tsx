@@ -3,6 +3,7 @@ import "./globals.css";
 import { Suspense } from "react";
 import Loading from "./loading";
 import { ThemeProvider } from "next-themes";
+import { Providers } from "@/lib/providers";
 
 export const metadata: Metadata = {
   title: "Local Farmer Booking - Fresh Produce Direct from Farmers",
@@ -24,9 +25,11 @@ export default function RootLayout({
       </head>
       <body className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 antialiased">
         <Suspense fallback={<Loading />}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
-          </ThemeProvider>
+          <Providers>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              {children}
+            </ThemeProvider>
+          </Providers>
         </Suspense>
       </body>
     </html>

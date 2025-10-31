@@ -9,6 +9,8 @@ const {
   changePassword,
   getAllFarmers,
   deleteUser,
+  upload,
+  // upload,
 } = require("../controllers/userController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 
@@ -16,10 +18,8 @@ const { authMiddleware } = require("../middleware/authMiddleware");
 // Public Routes (No authentication required)
 // ============================================
 
-// Register new user (customer or farmer)
-router.post("/register", addUser);
-// Alternative route for backward compatibility
-router.post("/user", addUser);
+// Register new user (customer or farmer) - Single route
+router.post("/register", upload.single("profilePicture"), addUser);
 
 // Login
 router.post("/login", login);
@@ -37,8 +37,8 @@ router.get("/farmers", getAllFarmers);
 // Get user by ID
 router.get("/user/:id", authMiddleware, getUserById);
 
-// Update user profile
-router.put("/user/:id", authMiddleware, updateUser);
+// Update user profile (with optional file upload)
+router.put("/user/:id", authMiddleware, upload.single("profilePicture"), updateUser);
 
 // Change password
 router.put("/user/:id/password", authMiddleware, changePassword);

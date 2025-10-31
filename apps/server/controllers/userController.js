@@ -1,7 +1,37 @@
 const { User } = require("../models/userModel");
+const cloudinary = require("../utils/cloudinary");
+const multer = require("multer");
+
+// Multer config: Memory storage (for Cloudinary upload; no disk save)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed!"), false);
+    }
+  },
+});
+
+// Helper function for Cloudinary upload (reusable, Promise-based)
+const uploadToCloudinary = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "farmfresh/profiles", resource_type: "image" },
+      (error, result) => {
+        if (error) reject(new Error(`Cloudinary upload failed: ${error.message}`));
+        else resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+};
 
 // Register new user (customer or farmer)
-exports.addUser = async (req, res) => {
+const addUser = async (req, res) => {
   try {
     const {
       userType,
@@ -12,13 +42,20 @@ exports.addUser = async (req, res) => {
       address,
       bio,
       password,
-      profilePicture,
       // Farmer-specific fields
       farmName,
       specialization,
       farmSize,
       farmSizeUnit,
     } = req.body;
+
+    // Basic Multer error check (global handler catches more; this for explicit)
+    if (req.file && !req.file.buffer) {
+      return res.status(400).send({
+        status: false,
+        error: "Invalid file upload",
+      });
+    }
 
     // Validate required fields
     if (!firstName || !lastName || !email || !phone || !address || !password) {
@@ -55,6 +92,13 @@ exports.addUser = async (req, res) => {
       });
     }
 
+    // Handle profile picture upload to Cloudinary
+    let profilePicture = "";
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+      profilePicture = result.secure_url; // Use secure_url for public access
+    }
+
     // Prepare user data
     const userData = {
       userType,
@@ -65,7 +109,7 @@ exports.addUser = async (req, res) => {
       address,
       bio: bio || "",
       password,
-      profilePicture: profilePicture || "",
+      profilePicture,
     };
 
     // Add farmer-specific details if user is a farmer
@@ -74,7 +118,7 @@ exports.addUser = async (req, res) => {
         farmName,
         specialization,
         farmSize: {
-          value: farmSize || 0,
+          value: parseFloat(farmSize) || 0, // Parse to Number
           unit: farmSizeUnit || "acres",
         },
       };
@@ -104,12 +148,13 @@ exports.addUser = async (req, res) => {
         error: "Email already exists",
       });
     }
+    console.error("Registration error:", err); // Log for debugging
     res.status(500).send({ status: false, error: err.message });
   }
 };
 
 // Get user by email
-exports.getUserByEmail = async (req, res) => {
+const getUserByEmail = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.params.email }).select("-password");
 
@@ -127,7 +172,7 @@ exports.getUserByEmail = async (req, res) => {
 };
 
 // Get user by ID
-exports.getUserById = async (req, res) => {
+const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
 
@@ -145,7 +190,7 @@ exports.getUserById = async (req, res) => {
 };
 
 // Login
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -193,7 +238,7 @@ exports.login = async (req, res) => {
 };
 
 // Update user profile
-exports.updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
     const updates = req.body;
@@ -219,6 +264,20 @@ exports.updateUser = async (req, res) => {
       });
     }
 
+    // Handle profile picture update
+    if (req.file) {
+      // Delete old profile picture from Cloudinary if exists
+      if (user.profilePicture) {
+        const publicId = user.profilePicture.split("/").pop()?.split(".")[0];
+        if (publicId) {
+          await cloudinary.uploader.destroy(`farmfresh/profiles/${publicId}`);
+        }
+      }
+      // Upload new to Cloudinary
+      const result = await uploadToCloudinary(req.file.buffer);
+      updates.profilePicture = result.secure_url;
+    }
+
     // Update user
     const updatedUser = await User.findByIdAndUpdate(
       userId,
@@ -237,7 +296,7 @@ exports.updateUser = async (req, res) => {
 };
 
 // Change password
-exports.changePassword = async (req, res) => {
+const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const userId = req.params.id;
@@ -288,7 +347,7 @@ exports.changePassword = async (req, res) => {
 };
 
 // Get all farmers (for listing farmers)
-exports.getAllFarmers = async (req, res) => {
+const getAllFarmers = async (req, res) => {
   try {
     const farmers = await User.find({ userType: "farmer" })
       .select("-password")
@@ -305,7 +364,7 @@ exports.getAllFarmers = async (req, res) => {
 };
 
 // Delete user
-exports.deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
 
@@ -325,4 +384,17 @@ exports.deleteUser = async (req, res) => {
   } catch (err) {
     res.status(500).send({ status: false, error: err.message });
   }
+};
+
+// Export all (CommonJS)
+module.exports = {
+  addUser,
+  getUserByEmail,
+  getUserById,
+  login,
+  updateUser,
+  changePassword,
+  getAllFarmers,
+  deleteUser,
+  upload,
 };

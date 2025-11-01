@@ -1,4 +1,5 @@
 import { api } from "..";
+import { setCredentials, updateUserProfile, logout } from "./userSlice";
 
 export const usersApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -11,12 +12,17 @@ export const usersApi = api.injectEndpoints({
       }),
       invalidatesTags: ["User"],
       // Store token after successful registration
-      async onQueryStarted(arg, { queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           if (data.status && data.data.token) {
-            localStorage.setItem("token", data.data.token);
-            localStorage.setItem("user", JSON.stringify(data.data));
+            // Use Redux action to set credentials
+            dispatch(
+              setCredentials({
+                user: data.data,
+                token: data.data.token,
+              })
+            );
           }
         } catch (error) {
           console.error("Registration failed:", error);
@@ -33,12 +39,17 @@ export const usersApi = api.injectEndpoints({
       }),
       invalidatesTags: ["User"],
       // Store token after successful login
-      async onQueryStarted(arg, { queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           if (data.status && data.data.token) {
-            localStorage.setItem("token", data.data.token);
-            localStorage.setItem("user", JSON.stringify(data.data));
+            // Use Redux action to set credentials
+            dispatch(
+              setCredentials({
+                user: data.data,
+                token: data.data.token,
+              })
+            );
           }
         } catch (error) {
           console.error("Login failed:", error);
@@ -82,14 +93,12 @@ export const usersApi = api.injectEndpoints({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "User", id }],
       // Update stored user data after successful update
-      async onQueryStarted({ id, ...patch }, { queryFulfilled }) {
+      async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           if (data.status) {
-            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-            if (storedUser._id === id) {
-              localStorage.setItem("user", JSON.stringify(data.data));
-            }
+            // Update user profile in Redux
+            dispatch(updateUserProfile(data.data));
           }
         } catch (error) {
           console.error("Update failed:", error);

@@ -24,13 +24,11 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 antialiased">
-        <Suspense fallback={<Loading />}>
-          <Providers>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              {children}
-            </ThemeProvider>
-          </Providers>
-        </Suspense>
+        <Providers>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <Suspense fallback={<Loading />}>{children}</Suspense>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { api } from "./api";
+import userReducer from "./api/endpoints/userSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -10,6 +11,7 @@ export const makeStore = () => {
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
+    user: userReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(api.middleware),

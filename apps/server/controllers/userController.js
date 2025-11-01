@@ -1,6 +1,8 @@
 const { User } = require("../models/userModel");
 const cloudinary = require("../utils/cloudinary");
 const multer = require("multer");
+const crypto = require("crypto");
+const { sendPasswordResetEmail } = require("../utils/email");
 
 // Multer config: Memory storage (for Cloudinary upload; no disk save)
 const storage = multer.memoryStorage();
@@ -386,6 +388,110 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Request password reset
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).send({
+        status: false,
+        error: "Email is required",
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      // Don't reveal if user exists or not for security
+      return res.status(200).send({
+        status: true,
+        message: "If that email exists, a password reset link has been sent",
+      });
+    }
+
+    // Generate reset token
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
+    // Send email
+    try {
+      await sendPasswordResetEmail(user.email, resetToken, user.firstName);
+
+      res.status(200).send({
+        status: true,
+        message: "Password reset link sent to email",
+      });
+    } catch (emailError) {
+      // If email fails, clear the reset token
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      console.error("Email sending failed:", emailError);
+      return res.status(500).send({
+        status: false,
+        error: "Failed to send password reset email. Please try again later.",
+      });
+    }
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).send({ status: false, error: err.message });
+  }
+};
+
+// Reset password
+const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).send({
+        status: false,
+        error: "Token and new password are required",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).send({
+        status: false,
+        error: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Hash the token from URL to compare with stored hash
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    // Find user with valid token
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).send({
+        status: false,
+        error: "Invalid or expired password reset token",
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).send({
+      status: true,
+      message: "Password reset successful. You can now login with your new password.",
+    });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).send({ status: false, error: err.message });
+  }
+};
+
 // Export all (CommonJS)
 module.exports = {
   addUser,
@@ -396,5 +502,7 @@ module.exports = {
   changePassword,
   getAllFarmers,
   deleteUser,
+  forgotPassword,
+  resetPassword,
   upload,
 };

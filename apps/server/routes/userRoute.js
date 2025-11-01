@@ -10,6 +10,8 @@ const {
   getAllFarmers,
   deleteUser,
   upload,
+  forgotPassword,
+  resetPassword,
   // upload,
 } = require("../controllers/userController");
 const { authMiddleware } = require("../middleware/authMiddleware");
@@ -23,6 +25,12 @@ router.post("/register", upload.single("profilePicture"), addUser);
 
 // Login
 router.post("/login", login);
+
+// Forgot password
+router.post("/forgot-password", forgotPassword);
+
+// Reset password
+router.post("/reset-password", resetPassword);
 
 // Get user by email
 router.get("/user/email/:email", getUserByEmail);

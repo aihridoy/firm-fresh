@@ -62,14 +62,10 @@ export default function Login() {
     }
 
     try {
-      const result = await loginUser({
+      await loginUser({
         email: formData.email,
         password: formData.password,
       }).unwrap();
-
-      console.log("Login successful:", result);
-
-      // Redirect to home/dashboard after successful login
       router.push("/");
     } catch (err) {
       const error = err as RTKError;
@@ -82,8 +78,7 @@ export default function Login() {
     setFormData({ email, password, remember: false });
 
     try {
-      const result = await loginUser({ email, password }).unwrap();
-      console.log("Demo login successful:", result);
+      await loginUser({ email, password }).unwrap();
       router.push("/");
     } catch (err) {
       const error = err as RTKError;

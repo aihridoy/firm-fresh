@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useTheme } from "@/hooks/use-theme";
 import {
   logout,
@@ -12,7 +11,6 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function Navbar() {
-  const router = useRouter();
   const { theme, toggleTheme, mounted } = useTheme();
   const user = useAppSelector(selectCurrentUser);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -46,7 +44,6 @@ export default function Navbar() {
   const handleLogout = () => {
     dispatch(logout());
     setIsUserMenuOpen(false);
-    router.push("/login");
   };
 
   // Get user initials for avatar fallback

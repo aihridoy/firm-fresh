@@ -1,5 +1,5 @@
 import { api } from "..";
-import { setCredentials, updateUserProfile, logout } from "./userSlice";
+import { setCredentials, updateUserProfile } from "./userSlice";
 
 export const usersApi = api.injectEndpoints({
   endpoints: (builder) => ({

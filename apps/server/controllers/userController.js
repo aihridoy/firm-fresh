@@ -148,7 +148,7 @@ const addUser = async (req, res) => {
         error: "Email already exists",
       });
     }
-    console.error("Registration error:", err); // Log for debugging
+    console.error("Registration error:", err);
     res.status(500).send({ status: false, error: err.message });
   }
 };

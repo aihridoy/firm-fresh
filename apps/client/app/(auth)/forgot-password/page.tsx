@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useForgotPasswordMutation } from "@/lib/api/endpoints/users";
 
 interface RTKError {
   data?: {
@@ -11,8 +12,9 @@ interface RTKError {
 }
 
 export default function ForgotPassword() {
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
+
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -31,36 +33,24 @@ export default function ForgotPassword() {
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/forgot-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const result = await forgotPassword(email).unwrap();
 
-      const data = await response.json();
-
-      if (data.status) {
+      if (result.status) {
         setSuccessMessage(
-          "If that email exists in our system, we've sent a password reset link. Please check your inbox."
+          result.message ||
+            "If that email exists in our system, we've sent a password reset link. Please check your inbox."
         );
         setEmail("");
       } else {
-        setErrorMessage(data.error || "Failed to send reset link");
+        setErrorMessage(result.error || "Failed to send reset link");
       }
     } catch (err) {
       const error = err as RTKError;
       console.error("Forgot password error:", error);
-      setErrorMessage("An error occurred. Please try again later.");
-    } finally {
-      setIsLoading(false);
+      setErrorMessage(
+        error.data?.error || "An error occurred. Please try again later."
+      );
     }
   };
 

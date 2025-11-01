@@ -57,6 +57,24 @@ export const usersApi = api.injectEndpoints({
       },
     }),
 
+    // Forgot password - Request reset link
+    forgotPassword: builder.mutation({
+      query: (email) => ({
+        url: "/forgot-password",
+        method: "POST",
+        body: { email },
+      }),
+    }),
+
+    // Reset password - Set new password with token
+    resetPassword: builder.mutation({
+      query: ({ token, newPassword }) => ({
+        url: "/reset-password",
+        method: "POST",
+        body: { token, newPassword },
+      }),
+    }),
+
     // Get user by ID
     getUserById: builder.query({
       query: (id) => `/user/${id}`,
@@ -140,6 +158,8 @@ export const usersApi = api.injectEndpoints({
 export const {
   useRegisterUserMutation,
   useLoginUserMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
   useGetUserByIdQuery,
   useGetUserByEmailQuery,
   useGetAllFarmersQuery,

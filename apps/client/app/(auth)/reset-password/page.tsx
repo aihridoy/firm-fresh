@@ -3,11 +3,22 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Loading from "@/app/loading";
+import { useResetPasswordMutation } from "@/lib/api/endpoints/users";
+
+interface RTKError {
+  data?: {
+    error?: string;
+    message?: string;
+  };
+  status?: number;
+}
 
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
   const [formData, setFormData] = useState({
     newPassword: "",
@@ -15,7 +26,6 @@ function ResetPasswordForm() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -55,38 +65,26 @@ function ResetPasswordForm() {
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/reset-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            token,
-            newPassword: formData.newPassword,
-          }),
-        }
-      );
+      const result = await resetPassword({
+        token,
+        newPassword: formData.newPassword,
+      }).unwrap();
 
-      const data = await response.json();
-
-      if (data.status) {
-        setSuccessMessage(data.message);
+      if (result.status) {
+        setSuccessMessage(result.message || "Password reset successful!");
         setTimeout(() => {
           router.push("/login");
         }, 2000);
       } else {
-        setErrorMessage(data.error || "Failed to reset password");
+        setErrorMessage(result.error || "Failed to reset password");
       }
     } catch (err) {
-      console.error("Reset password error:", err);
-      setErrorMessage("An error occurred. Please try again later.");
-    } finally {
-      setIsLoading(false);
+      const error = err as RTKError;
+      console.error("Reset password error:", error);
+      setErrorMessage(
+        error.data?.error || "An error occurred. Please try again later."
+      );
     }
   };
 

@@ -1,11 +1,102 @@
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useLoginUserMutation } from "@/lib/api/endpoints/users";
 import Link from "next/link";
 
-/* eslint-disable react/no-unescaped-entities */
+interface RTKError {
+  data?: {
+    error?: string;
+    message?: string;
+  };
+  status?: number;
+}
+
 export default function Login() {
+  const router = useRouter();
+  const [loginUser, { isSuccess, error, isLoading }] = useLoginUserMutation();
+
+  // Form state
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    remember: false,
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [validationError, setValidationError] = useState("");
+
+  // Handle input changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  // Form validation
+  const validateForm = () => {
+    if (!formData.email.trim()) {
+      setValidationError("Email is required");
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      setValidationError("Email is invalid");
+      return false;
+    }
+    if (!formData.password) {
+      setValidationError("Password is required");
+      return false;
+    }
+    setValidationError("");
+    return true;
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      await loginUser({
+        email: formData.email,
+        password: formData.password,
+      }).unwrap();
+      router.push("/");
+    } catch (err) {
+      const error = err as RTKError;
+      setValidationError(error.data?.error || "Login failed");
+    }
+  };
+
+  // Handle demo account login
+  const handleDemoLogin = async (email: string, password: string) => {
+    setFormData({ email, password, remember: false });
+
+    try {
+      await loginUser({ email, password }).unwrap();
+      router.push("/");
+    } catch (err) {
+      const error = err as RTKError;
+      setValidationError(error.data?.error || "Demo login failed");
+    }
+  };
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isSuccess) {
+      router.push("/");
+    }
+  }, [isSuccess, router]);
+
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* <!-- Header --> */}
+        {/* Header */}
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <div className="bg-primary-500 p-3 rounded-full">
@@ -20,9 +111,20 @@ export default function Login() {
           </p>
         </div>
 
-        {/* <!-- Login Form --> */}
+        {/* Login Form */}
         <div className="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-2xl">
-          <form className="space-y-6" action="#" method="POST">
+          {/* Error Message */}
+          {(validationError || error) && (
+            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {validationError ||
+                  (error as RTKError)?.data?.error ||
+                  "An error occurred"}
+              </p>
+            </div>
+          )}
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="email"
@@ -36,6 +138,8 @@ export default function Login() {
                   name="email"
                   type="email"
                   required
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   placeholder="john@example.com"
                 />
@@ -54,17 +158,24 @@ export default function Login() {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
+                  value={formData.password}
+                  onChange={handleChange}
                   className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   placeholder="••••••••"
                 />
                 <i className="fas fa-lock absolute left-3 top-3.5 text-gray-400"></i>
                 <button
                   type="button"
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
-                  <i className="fas fa-eye text-gray-400 hover:text-gray-600"></i>
+                  <i
+                    className={`fas ${
+                      showPassword ? "fa-eye-slash" : "fa-eye"
+                    } text-gray-400 hover:text-gray-600`}
+                  ></i>
                 </button>
               </div>
             </div>
@@ -75,6 +186,8 @@ export default function Login() {
                   id="remember"
                   name="remember"
                   type="checkbox"
+                  checked={formData.remember}
+                  onChange={handleChange}
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
                 <label
@@ -94,12 +207,20 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-medium transition duration-200 transform hover:scale-105"
+              disabled={isLoading}
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-medium transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Sign In
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Signing In...
+                </span>
+              ) : (
+                "Sign In"
+              )}
             </button>
 
-            {/* <!-- Divider --> */}
+            {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
@@ -111,7 +232,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* <!-- Social Login --> */}
+            {/* Social Login */}
             <button
               type="button"
               className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-200 flex items-center justify-center space-x-2"
@@ -121,32 +242,42 @@ export default function Login() {
             </button>
           </form>
 
-          {/* <!-- Register Link --> */}
+          {/* Register Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?
-              <a
-                href="register.html"
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/register"
                 className="text-primary-600 hover:text-primary-500 font-medium"
               >
                 Create account
-              </a>
+              </Link>
             </p>
           </div>
         </div>
 
-        {/* <!-- Demo Accounts --> */}
+        {/* Demo Accounts */}
         <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
           <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
             Demo Accounts:
           </h3>
-          <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-            <div>
+          <div className="space-y-2">
+            <button
+              onClick={() =>
+                handleDemoLogin("customer@demo.com", "password123")
+              }
+              className="w-full text-left text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 p-2 rounded transition"
+              disabled={isLoading}
+            >
               <strong>Customer:</strong> customer@demo.com / password123
-            </div>
-            <div>
+            </button>
+            <button
+              onClick={() => handleDemoLogin("farmer@demo.com", "password123")}
+              className="w-full text-left text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 p-2 rounded transition"
+              disabled={isLoading}
+            >
               <strong>Farmer:</strong> farmer@demo.com / password123
-            </div>
+            </button>
           </div>
         </div>
       </div>

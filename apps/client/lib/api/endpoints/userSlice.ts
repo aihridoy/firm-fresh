@@ -25,9 +25,10 @@ export interface User {
 }
 
 // Define the auth state
-interface AuthState {
+export interface AuthState {
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
 }
 
@@ -35,6 +36,7 @@ interface AuthState {
 const getInitialState = (): AuthState => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
+    const refreshToken = localStorage.getItem("refreshToken");
     const userStr = localStorage.getItem("user");
 
     if (token && userStr) {
@@ -43,6 +45,7 @@ const getInitialState = (): AuthState => {
         return {
           user,
           token,
+          refreshToken,
           isAuthenticated: true,
         };
       } catch (error) {
@@ -54,6 +57,7 @@ const getInitialState = (): AuthState => {
   return {
     user: null,
     token: null,
+    refreshToken: null,
     isAuthenticated: false,
   };
 };
@@ -67,16 +71,30 @@ const userSlice = createSlice({
     // Set user credentials (login/register)
     setCredentials: (
       state,
-      action: PayloadAction<{ user: User; token: string }>
+      action: PayloadAction<{ user: User; token: string; refreshToken?: string }>
     ) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
+      if (action.payload.refreshToken) {
+        state.refreshToken = action.payload.refreshToken;
+      }
 
       // Store in localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem("token", action.payload.token);
         localStorage.setItem("user", JSON.stringify(action.payload.user));
+        if (action.payload.refreshToken) {
+          localStorage.setItem("refreshToken", action.payload.refreshToken);
+        }
+      }
+    },
+
+    // Set a freshly-minted access token (from the refresh-token flow)
+    setAccessToken: (state, action: PayloadAction<string>) => {
+      state.token = action.payload;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", action.payload);
       }
     },
 
@@ -96,11 +114,13 @@ const userSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
+      state.refreshToken = null;
       state.isAuthenticated = false;
 
       // Clear localStorage
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
       }
     },
@@ -109,12 +129,14 @@ const userSlice = createSlice({
     hydrateAuth: (state) => {
       if (typeof window !== "undefined") {
         const token = localStorage.getItem("token");
+        const refreshToken = localStorage.getItem("refreshToken");
         const userStr = localStorage.getItem("user");
 
         if (token && userStr) {
           try {
             state.user = JSON.parse(userStr);
             state.token = token;
+            state.refreshToken = refreshToken;
             state.isAuthenticated = true;
           } catch (error) {
             console.error("Failed to hydrate auth state:", error);
@@ -126,7 +148,7 @@ const userSlice = createSlice({
 });
 
 // Export actions
-export const { setCredentials, updateUserProfile, logout, hydrateAuth } =
+export const { setCredentials, setAccessToken, updateUserProfile, logout, hydrateAuth } =
   userSlice.actions;
 
 // Export selectors

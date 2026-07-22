@@ -1,5 +1,5 @@
 import { api } from "..";
-import { setCredentials, updateUserProfile } from "./userSlice";
+import { setCredentials, setAccessToken, updateUserProfile, logout } from "./userSlice";
 
 export const usersApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -21,6 +21,7 @@ export const usersApi = api.injectEndpoints({
               setCredentials({
                 user: data.data,
                 token: data.data.token,
+                refreshToken: data.data.refreshToken,
               })
             );
           }
@@ -48,6 +49,7 @@ export const usersApi = api.injectEndpoints({
               setCredentials({
                 user: data.data,
                 token: data.data.token,
+                refreshToken: data.data.refreshToken,
               })
             );
           }
@@ -152,6 +154,43 @@ export const usersApi = api.injectEndpoints({
         }
       },
     }),
+
+    // Exchange a refresh token for a new access token
+    refreshAccessToken: builder.mutation({
+      query: (refreshToken: string) => ({
+        url: "/refresh-token",
+        method: "POST",
+        body: { refreshToken },
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.status && data.data.token) {
+            dispatch(setAccessToken(data.data.token));
+          }
+        } catch (error) {
+          console.error("Token refresh failed:", error);
+        }
+      },
+    }),
+
+    // Logout - clear refresh token server-side, then clear local auth state
+    logoutUser: builder.mutation({
+      query: (refreshToken: string | null) => ({
+        url: "/logout",
+        method: "POST",
+        body: { refreshToken },
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Server logout failed:", error);
+        } finally {
+          dispatch(logout());
+        }
+      },
+    }),
   }),
 });
 
@@ -166,4 +205,6 @@ export const {
   useUpdateUserMutation,
   useChangePasswordMutation,
   useDeleteUserMutation,
+  useRefreshAccessTokenMutation,
+  useLogoutUserMutation,
 } = usersApi;

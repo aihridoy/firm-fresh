@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { useGetCartQuery, useUpdateCartItemMutation, useRemoveFromCartMutation } from "@/lib/api/endpoints/cart";
 import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
@@ -12,6 +13,23 @@ export default function Cart() {
   const [removeFromCart] = useRemoveFromCartMutation();
 
   const items = data?.data.items ?? [];
+
+  const handleUpdateQuantity = async (itemId: string, quantity: number) => {
+    try {
+      await updateCartItem({ itemId, quantity }).unwrap();
+    } catch {
+      toast.error("Couldn't update quantity. Please try again.");
+    }
+  };
+
+  const handleRemove = async (itemId: string) => {
+    try {
+      await removeFromCart(itemId).unwrap();
+      toast.success("Item removed from cart");
+    } catch {
+      toast.error("Couldn't remove item. Please try again.");
+    }
+  };
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const deliveryFee = items.length > 0 ? 50 : 0;
@@ -74,7 +92,7 @@ export default function Cart() {
 
                     <div className="flex flex-col items-end gap-3">
                       <button
-                        onClick={() => removeFromCart(item._id)}
+                        onClick={() => handleRemove(item._id)}
                         className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition"
                         aria-label="Remove item"
                       >
@@ -82,9 +100,7 @@ export default function Cart() {
                       </button>
                       <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
                         <button
-                          onClick={() =>
-                            updateCartItem({ itemId: item._id, quantity: Math.max(1, item.quantity - 1) })
-                          }
+                          onClick={() => handleUpdateQuantity(item._id, Math.max(1, item.quantity - 1))}
                           className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-l-lg transition"
                         >
                           <i className="fas fa-minus text-sm"></i>
@@ -93,12 +109,7 @@ export default function Cart() {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() =>
-                            updateCartItem({
-                              itemId: item._id,
-                              quantity: Math.min(item.product.stock, item.quantity + 1),
-                            })
-                          }
+                          onClick={() => handleUpdateQuantity(item._id, Math.min(item.product.stock, item.quantity + 1))}
                           className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-r-lg transition"
                         >
                           <i className="fas fa-plus text-sm"></i>

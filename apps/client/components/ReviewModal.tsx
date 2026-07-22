@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { useCreateReviewMutation, useUpdateReviewMutation } from "@/lib/api/endpoints/reviews";
 
 interface ReviewModalProps {
@@ -37,8 +38,10 @@ export default function ReviewModal({ productId, orderId, productName, existingR
     try {
       if (existingReview) {
         await updateReview({ id: existingReview._id, productId, rating, comment }).unwrap();
+        toast.success("Review updated");
       } else {
         await createReview({ productId, orderId, rating, comment }).unwrap();
+        toast.success("Review submitted");
       }
       onClose();
     } catch (err) {

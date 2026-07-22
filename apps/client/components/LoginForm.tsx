@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { useLoginUserMutation } from "@/lib/api/endpoints/users";
 
 interface RTKError {
@@ -47,6 +48,7 @@ export default function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
     try {
       await loginUser({ email: formData.email, password: formData.password }).unwrap();
+      toast.success("Welcome back!");
       onSuccess();
     } catch (err) {
       const error = err as RTKError;
@@ -58,6 +60,7 @@ export default function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     setFormData({ email, password, remember: false });
     try {
       await loginUser({ email, password }).unwrap();
+      toast.success("Welcome back!");
       onSuccess();
     } catch (err) {
       const error = err as RTKError;

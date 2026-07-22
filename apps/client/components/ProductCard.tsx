@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { Product } from "@/lib/api/endpoints/products";
 import { useAddToCartMutation } from "@/lib/api/endpoints/cart";
 import { useToggleFavoriteMutation, useCheckFavoriteQuery } from "@/lib/api/endpoints/favorites";
@@ -25,7 +26,12 @@ export default function ProductCard({ product }: { product: Product }) {
       router.push("/login");
       return;
     }
-    await addToCart({ productId: product._id, quantity: 1 });
+    try {
+      await addToCart({ productId: product._id, quantity: 1 }).unwrap();
+      toast.success(`${product.name} added to cart`);
+    } catch {
+      toast.error("Couldn't add to cart. Please try again.");
+    }
   };
 
   const handleToggleFavorite = async () => {
@@ -33,7 +39,12 @@ export default function ProductCard({ product }: { product: Product }) {
       router.push("/login");
       return;
     }
-    await toggleFavorite(product._id);
+    try {
+      const result = await toggleFavorite(product._id).unwrap();
+      toast.success(result.favorited ? "Added to favorites" : "Removed from favorites");
+    } catch {
+      toast.error("Couldn't update favorites. Please try again.");
+    }
   };
 
   return (

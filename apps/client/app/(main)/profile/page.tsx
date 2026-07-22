@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import { useUpdateUserMutation } from "@/lib/api/endpoints/users";
@@ -83,9 +84,11 @@ export default function Profile() {
 
     try {
       await updateUser({ id: user._id, formData }).unwrap();
+      toast.success("Profile updated");
       setIsEditing(false);
     } catch {
       setError("Failed to update profile. Please try again.");
+      toast.error("Couldn't update profile.");
     }
   };
 

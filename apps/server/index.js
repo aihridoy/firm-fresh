@@ -9,6 +9,11 @@ const { port } = require("./utils/config");
 
 // Import routes
 const userRoutes = require("./routes/userRoute");
+const productRoutes = require("./routes/productRoute").default;
+const cartRoutes = require("./routes/cartRoute").default;
+const orderRoutes = require("./routes/orderRoute").default;
+const reviewRoutes = require("./routes/reviewRoute").default;
+const favoriteRoutes = require("./routes/favoriteRoute").default;
 
 // Middleware
 app.use(helmet());
@@ -39,6 +44,11 @@ app.get("/", (req, res) => {
 
 // API routes
 app.use("/api", userRoutes);
+app.use("/api", productRoutes);
+app.use("/api", cartRoutes);
+app.use("/api", orderRoutes);
+app.use("/api", reviewRoutes);
+app.use("/api", favoriteRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {

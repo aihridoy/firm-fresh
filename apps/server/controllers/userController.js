@@ -2,6 +2,7 @@ const { User } = require("../models/userModel");
 const cloudinary = require("../utils/cloudinary");
 const multer = require("multer");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const { sendPasswordResetEmail } = require("../utils/email");
 
 // Multer config: Memory storage (for Cloudinary upload; no disk save)
@@ -130,16 +131,20 @@ const addUser = async (req, res) => {
     const user = new User(userData);
     const savedUser = await user.save();
 
-    // Generate token
+    // Generate access + refresh tokens
     const token = savedUser.generateAuthToken();
+    const refreshToken = savedUser.generateRefreshToken();
+    savedUser.refreshToken = refreshToken;
+    await savedUser.save({ validateBeforeSave: false });
 
     // Remove password from response
     const userResponse = savedUser.toObject();
     delete userResponse.password;
+    delete userResponse.refreshToken;
 
     res.status(201).send({
       status: true,
-      data: { ...userResponse, token },
+      data: { ...userResponse, token, refreshToken },
       message: "User registered successfully",
     });
   } catch (err) {
@@ -222,16 +227,20 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate token
+    // Generate access + refresh tokens
     const token = user.generateAuthToken();
+    const refreshToken = user.generateRefreshToken();
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
 
     // Remove password from response
     const userResponse = user.toObject();
     delete userResponse.password;
+    delete userResponse.refreshToken;
 
     res.send({
       status: true,
-      data: { ...userResponse, token },
+      data: { ...userResponse, token, refreshToken },
       message: "Login successful",
     });
   } catch (err) {
@@ -492,6 +501,66 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// Issue a new access token from a valid refresh token
+const refreshAccessToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).send({
+        status: false,
+        error: "Refresh token is required",
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch {
+      return res.status(401).send({
+        status: false,
+        error: "Invalid or expired refresh token",
+      });
+    }
+
+    const user = await User.findById(decoded.id);
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(401).send({
+        status: false,
+        error: "Refresh token not recognized",
+      });
+    }
+
+    const token = user.generateAuthToken();
+
+    res.send({
+      status: true,
+      data: { token },
+      message: "Access token refreshed",
+    });
+  } catch (err) {
+    res.status(500).send({ status: false, error: err.message });
+  }
+};
+
+// Clear the stored refresh token, ending the session
+const logout = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (refreshToken) {
+      await User.updateOne({ refreshToken }, { $unset: { refreshToken: 1 } });
+    }
+
+    res.send({
+      status: true,
+      message: "Logged out successfully",
+    });
+  } catch (err) {
+    res.status(500).send({ status: false, error: err.message });
+  }
+};
+
 // Export all (CommonJS)
 module.exports = {
   addUser,
@@ -503,6 +572,8 @@ module.exports = {
   getAllFarmers,
   deleteUser,
   forgotPassword,
+  refreshAccessToken,
+  logout,
   resetPassword,
   upload,
 };

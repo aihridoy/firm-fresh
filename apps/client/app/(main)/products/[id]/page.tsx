@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useGetProductByIdQuery, useGetProductsQuery } from "@/lib/api/endpoints/products";
-import { useGetProductReviewsQuery, Review } from "@/lib/api/endpoints/reviews";
+import { useGetProductReviewsQuery, useDeleteReviewMutation, Review } from "@/lib/api/endpoints/reviews";
+import { useGetUserOrdersQuery } from "@/lib/api/endpoints/orders";
 import { useAddToCartMutation } from "@/lib/api/endpoints/cart";
 import { useToggleFavoriteMutation, useCheckFavoriteQuery } from "@/lib/api/endpoints/favorites";
 import { useAppSelector } from "@/lib/hooks";
-import { selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
+import { selectIsAuthenticated, selectCurrentUser } from "@/lib/api/endpoints/userSlice";
 import ProductCard from "@/components/ProductCard";
+import ReviewModal from "@/components/ReviewModal";
 
 function StarRow({ rating, size = "" }: { rating: number; size?: string }) {
   return (
@@ -26,6 +28,7 @@ export default function ProductDetails() {
   const id = params.id;
   const router = useRouter();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const user = useAppSelector(selectCurrentUser);
 
   const { data, isLoading, isError } = useGetProductByIdQuery(id);
   const product = data?.data;
@@ -62,6 +65,16 @@ export default function ProductDetails() {
   const [toggleFavorite] = useToggleFavoriteMutation();
   const { data: favoriteData } = useCheckFavoriteQuery(id, { skip: !isAuthenticated });
   const isFavorited = favoriteData?.favorited ?? false;
+  const [deleteReview] = useDeleteReviewMutation();
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+
+  const { data: deliveredOrdersData } = useGetUserOrdersQuery(
+    { status: "delivered", limit: 100 },
+    { skip: !isAuthenticated }
+  );
+  const deliverableOrder = deliveredOrdersData?.data.find((o) => o.items.some((i) => i.product === id));
+  const myReview = allReviews.find((r) => typeof r.user === "object" && r.user._id === user?._id);
+  const canWriteReview = isAuthenticated && !!deliverableOrder;
 
   if (isLoading) {
     return <p className="text-center text-gray-500 dark:text-gray-400 py-24">Loading product...</p>;
@@ -104,6 +117,11 @@ export default function ProductDetails() {
   const handleToggleFavorite = async () => {
     if (requireAuth()) return;
     await toggleFavorite(product._id);
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!window.confirm("Delete this review?")) return;
+    await deleteReview({ id: reviewId, productId: id });
   };
 
   return (
@@ -192,6 +210,14 @@ export default function ProductDetails() {
                 <span className="text-lg font-semibold text-gray-900 dark:text-white">{avgRating.toFixed(1)}</span>
               </div>
               <span className="text-gray-500 dark:text-gray-400">({reviewCount} reviews)</span>
+              {canWriteReview && (
+                <button
+                  onClick={() => setReviewModalOpen(true)}
+                  className="text-primary-600 dark:text-primary-400 hover:underline text-sm"
+                >
+                  {myReview ? "Edit your review" : "Write a review"}
+                </button>
+              )}
             </div>
 
             <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6">
@@ -386,6 +412,22 @@ export default function ProductDetails() {
                                 </span>
                               </div>
                             </div>
+                            {reviewer?._id === user?._id && (
+                              <div className="flex items-center space-x-3 text-sm">
+                                <button
+                                  onClick={() => setReviewModalOpen(true)}
+                                  className="text-primary-600 dark:text-primary-400 hover:underline"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteReview(review._id)}
+                                  className="text-red-500 hover:underline"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
                           </div>
                           <p className="text-gray-700 dark:text-gray-300">{review.comment}</p>
                         </div>
@@ -421,6 +463,16 @@ export default function ProductDetails() {
           </div>
         )}
       </div>
+
+      {reviewModalOpen && (
+        <ReviewModal
+          productId={product._id}
+          orderId={deliverableOrder?._id ?? ""}
+          productName={product.name}
+          existingReview={myReview ? { _id: myReview._id, rating: myReview.rating, comment: myReview.comment } : undefined}
+          onClose={() => setReviewModalOpen(false)}
+        />
+      )}
     </>
   );
 }

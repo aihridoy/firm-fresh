@@ -10,6 +10,7 @@ export interface ProductFarmer {
   firstName: string;
   lastName: string;
   profilePicture?: string;
+  createdAt?: string;
   farmerDetails?: {
     farmName: string;
     specialization: string;
@@ -51,6 +52,11 @@ export interface GetProductsParams {
   sort?: "price-asc" | "price-desc" | "newest" | "featured";
   page?: number;
   limit?: number;
+  farmer?: string;
+  location?: string;
+  organic?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export const productsApi = api.injectEndpoints({
@@ -63,6 +69,11 @@ export const productsApi = api.injectEndpoints({
         if (params?.sort) query.sort = params.sort;
         if (params?.page) query.page = String(params.page);
         if (params?.limit) query.limit = String(params.limit);
+        if (params?.farmer) query.farmer = params.farmer;
+        if (params?.location) query.location = params.location;
+        if (params?.organic) query.organic = "true";
+        if (params?.minPrice) query.minPrice = String(params.minPrice);
+        if (params?.maxPrice) query.maxPrice = String(params.maxPrice);
         return { url: "/products", params: query };
       },
       providesTags: (result) =>

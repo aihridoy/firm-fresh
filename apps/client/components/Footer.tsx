@@ -20,13 +20,31 @@ export default function Footer() {
               farmers.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a
+                href="https://www.facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="FarmFresh on Facebook"
+                className="text-gray-400 hover:text-white"
+              >
                 <i className="fab fa-facebook"></i>
               </a>
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a
+                href="https://www.twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="FarmFresh on Twitter"
+                className="text-gray-400 hover:text-white"
+              >
                 <i className="fab fa-twitter"></i>
               </a>
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="FarmFresh on Instagram"
+                className="text-gray-400 hover:text-white"
+              >
                 <i className="fab fa-instagram"></i>
               </a>
             </div>
@@ -77,9 +95,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <Link href="/help-center#farmers" className="hover:text-white">
                   Farmer Support
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -88,34 +106,31 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <a href="#" className="hover:text-white">
+                <Link href="/help-center" className="hover:text-white">
                   Help Center
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <Link href="/contact" className="hover:text-white">
                   Contact Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <Link href="/terms" className="hover:text-white">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <Link href="/privacy" className="hover:text-white">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>
-            &copy; 2025 FarmFresh - Local Farmer Booking. All rights reserved by
-            LWS.
-          </p>
+          <p>&copy; {new Date().getFullYear()} FarmFresh - Local Farmer Booking. All rights reserved.</p>
         </div>
       </div>
     </footer>

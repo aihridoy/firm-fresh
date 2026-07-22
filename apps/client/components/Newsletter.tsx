@@ -1,4 +1,25 @@
+"use client";
+
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { useSubscribeNewsletterMutation } from "@/lib/api/endpoints/newsletter";
+
 export default function Newsletter() {
+  const [email, setEmail] = useState("");
+  const [subscribe, { isLoading }] = useSubscribeNewsletterMutation();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const result = await subscribe(email.trim()).unwrap();
+      toast.success(result.message);
+      setEmail("");
+    } catch (err) {
+      const message = (err as { data?: { error?: string } })?.data?.error;
+      toast.error(message || "Couldn't subscribe. Please try again.");
+    }
+  };
+
   return (
     <section className="py-16 bg-white dark:bg-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,16 +32,24 @@ export default function Newsletter() {
             Get notified about new farmers, seasonal produce, and special offers
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
+              aria-label="Email address"
               className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
-            <button className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition">
-              Subscribe
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition"
+            >
+              {isLoading ? "Subscribing..." : "Subscribe"}
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </section>

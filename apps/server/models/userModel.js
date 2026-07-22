@@ -65,7 +65,7 @@ const userSchema = new mongoose.Schema(
       },
       specialization: {
         type: String,
-        enum: ["vegetables", "fruits", "grains", "dairy", "mixed", ""],
+        enum: ["vegetables", "fruits", "grains", "dairy", "herbs", "honey", "mixed", ""],
         default: "",
         required: function () {
           return this.userType === "farmer";

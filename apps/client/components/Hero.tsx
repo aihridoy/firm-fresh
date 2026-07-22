@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useGetPublicStatsQuery } from "@/lib/api/endpoints/stats";
 
 const CATEGORIES = ["vegetables", "fruits", "grains", "dairy", "herbs", "honey"];
 const POPULAR = ["Tomatoes", "Mangoes", "Honey", "Fresh Milk"];
@@ -11,6 +12,8 @@ export default function Hero() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
+  const { data: statsData } = useGetPublicStatsQuery();
+  const stats = statsData?.data;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,26 +91,18 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 md:gap-8 max-w-md mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold">500+</div>
-              <div className="text-green-200 dark:text-green-300">
-                Local Farmers
+          {/* Stats — live platform counts */}
+          <div className="grid grid-cols-3 gap-4 md:gap-8 max-w-xl mx-auto">
+            {[
+              { value: stats?.farmers, label: "Local Farmers" },
+              { value: stats?.products, label: "Fresh Products" },
+              { value: stats?.customers, label: "Happy Customers" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-3xl font-bold">{stat.value ?? "—"}</div>
+                <div className="text-green-200 dark:text-green-300 sm:whitespace-nowrap">{stat.label}</div>
               </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">2000+</div>
-              <div className="text-green-200 dark:text-green-300">
-                Fresh Products
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">10k+</div>
-              <div className="text-green-200 dark:text-green-300">
-                Happy Customers
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

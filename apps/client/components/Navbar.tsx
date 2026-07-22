@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import { useTheme } from "@/hooks/use-theme";
 import {
@@ -16,6 +16,7 @@ import NavbarSearch from "@/components/NavbarSearch";
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { theme, toggleTheme, mounted } = useTheme();
   const user = useAppSelector(selectCurrentUser);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -119,12 +120,12 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {mainNavLinks.map((link, i) => (
+            {mainNavLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={
-                  i === 0
+                  (link.href === "/" ? pathname === "/" : pathname.startsWith(link.href))
                     ? "text-primary-600 dark:text-primary-400 font-medium hover:text-primary-700 dark:hover:text-primary-300 transition"
                     : "text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
                 }

@@ -39,15 +39,35 @@ const SORT_OPTIONS: Record<string, Record<string, 1 | -1>> = {
 
 export const listProducts = async (req: Request, res: Response) => {
   try {
-    const { search, category, sort, page = "1", limit = "12" } = req.query as Record<string, string>;
+    const {
+      search,
+      category,
+      sort,
+      page = "1",
+      limit = "12",
+      farmer,
+      location,
+      organic,
+      minPrice,
+      maxPrice,
+    } = req.query as Record<string, string>;
 
     const filter: Record<string, unknown> = { isPublished: true };
     if (category) filter.category = category;
+    if (farmer) filter.farmer = farmer;
+    if (location) filter.farmLocation = { $regex: location, $options: "i" };
+    if (organic === "true") filter.features = "organic";
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
       ];
+    }
+    if (minPrice || maxPrice) {
+      const price: Record<string, number> = {};
+      if (minPrice) price.$gte = parseFloat(minPrice);
+      if (maxPrice) price.$lte = parseFloat(maxPrice);
+      filter.price = price;
     }
 
     const pageNum = Math.max(parseInt(page, 10) || 1, 1);
@@ -90,7 +110,7 @@ export const getProductById = async (req: Request, res: Response) => {
   try {
     const product = await Product.findById(req.params.id).populate(
       "farmer",
-      "firstName lastName farmerDetails profilePicture"
+      "firstName lastName farmerDetails profilePicture createdAt"
     );
 
     if (!product) {

@@ -54,7 +54,10 @@ export const reviewsApi = api.injectEndpoints({
       { status: boolean; data: Review },
       { id: string; productId: string; rating?: number; comment?: string }
     >({
-      query: ({ id, productId, ...body }) => ({ url: `/reviews/${id}`, method: "PUT", body }),
+      query: ({ id, ...body }) => {
+        delete (body as { productId?: string }).productId;
+        return { url: `/reviews/${id}`, method: "PUT", body };
+      },
       invalidatesTags: (result, error, { productId }) => [
         { type: "Review", id: productId },
         { type: "Product", id: productId },

@@ -1,113 +1,205 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useAppSelector } from "@/lib/hooks";
+import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
+import { useCreateProductMutation, useUpdateProductMutation, useGetProductByIdQuery } from "@/lib/api/endpoints/products";
+
+const CATEGORIES = ["vegetables", "fruits", "grains", "dairy", "herbs", "honey"];
+const UNITS = [
+  { value: "kg", label: "Kilogram (kg)" },
+  { value: "lbs", label: "Pounds (lbs)" },
+  { value: "piece", label: "Piece" },
+  { value: "liter", label: "Liter" },
+  { value: "dozen", label: "Dozen" },
+  { value: "bundle", label: "Bundle" },
+];
+const FEATURES = [
+  { value: "organic", label: "Organic" },
+  { value: "pesticide-free", label: "Pesticide Free" },
+  { value: "fresh", label: "Fresh" },
+  { value: "non-gmo", label: "Non-GMO" },
+  { value: "local", label: "Local" },
+  { value: "sustainable", label: "Sustainable" },
+  { value: "fair-trade", label: "Fair Trade" },
+  { value: "gluten-free", label: "Gluten-Free" },
+];
+
 export default function AddProduct() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const user = useAppSelector(selectCurrentUser);
+
+  const { data: existingProduct } = useGetProductByIdQuery(editId as string, { skip: !editId });
+  const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
+  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
+
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [unit, setUnit] = useState("");
+  const [stock, setStock] = useState("");
+  const [farmLocation, setFarmLocation] = useState("");
+  const [harvestDate, setHarvestDate] = useState("");
+  const [features, setFeatures] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (isAuthenticated && user && user.userType !== "farmer") {
+      router.replace("/");
+    }
+    if (!isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, user, router]);
+
+  useEffect(() => {
+    if (existingProduct?.data) {
+      const p = existingProduct.data;
+      setName(p.name);
+      setCategory(p.category);
+      setDescription(p.description);
+      setPrice(String(p.price));
+      setUnit(p.unit);
+      setStock(String(p.stock));
+      setFarmLocation(p.farmLocation);
+      setHarvestDate(p.harvestDate ? p.harvestDate.slice(0, 10) : "");
+      setFeatures(p.features);
+    }
+  }, [existingProduct]);
+
+  const toggleFeature = (value: string) => {
+    setFeatures((prev) => (prev.includes(value) ? prev.filter((f) => f !== value) : [...prev, value]));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).slice(0, 5);
+    setImageFiles(files);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!editId && imageFiles.length === 0) {
+      setError("Please upload at least one product image.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("category", category);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("unit", unit);
+    formData.append("stock", stock);
+    formData.append("farmLocation", farmLocation);
+    if (harvestDate) formData.append("harvestDate", harvestDate);
+    features.forEach((f) => formData.append("features", f));
+    imageFiles.forEach((file) => formData.append("images", file));
+
+    try {
+      if (editId) {
+        await updateProduct({ id: editId, formData }).unwrap();
+      } else {
+        await createProduct(formData).unwrap();
+      }
+      router.push("/manage-list");
+    } catch (err) {
+      const message = (err as { data?: { error?: string } })?.data?.error || "Something went wrong. Please try again.";
+      setError(message);
+    }
+  };
+
+  const isSubmitting = isCreating || isUpdating;
+
   return (
     <>
-      {/* <!-- Breadcrumb --> */}
+      {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 text-sm">
             <li>
-              <a
-                href="index.html"
-                className="text-gray-500 hover:text-primary-600"
-              >
+              <Link href="/" className="text-gray-500 hover:text-primary-600">
                 Home
-              </a>
+              </Link>
             </li>
             <li>
               <i className="fas fa-chevron-right text-gray-400 text-xs"></i>
             </li>
             <li>
-              <a
-                href="manageList.html"
-                className="text-gray-500 hover:text-primary-600"
-              >
+              <Link href="/manage-list" className="text-gray-500 hover:text-primary-600">
                 Manage Products
-              </a>
+              </Link>
             </li>
             <li>
               <i className="fas fa-chevron-right text-gray-400 text-xs"></i>
             </li>
-            <li className="text-gray-900 dark:text-white">Add Product</li>
+            <li className="text-gray-900 dark:text-white">{editId ? "Edit Product" : "Add Product"}</li>
           </ol>
         </nav>
       </div>
 
-      {/* <!-- Add Product Form --> */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-          {/* <!-- Header --> */}
           <div className="bg-primary-600 text-white px-8 py-6">
-            <h1 className="text-3xl font-bold">Add New Product</h1>
-            <p className="text-primary-100 mt-2">
-              Share your fresh produce with customers
-            </p>
+            <h1 className="text-3xl font-bold">{editId ? "Edit Product" : "Add New Product"}</h1>
+            <p className="text-primary-100 mt-2">Share your fresh produce with customers</p>
           </div>
 
-          {/* <!-- Form --> */}
-          <form
-            className="p-8 space-y-8"
-            action="#"
-            method="POST"
-            encType="multipart/form-data"
-          >
-            {/* <!-- Basic Information --> */}
+          <form onSubmit={handleSubmit} className="p-8 space-y-8">
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg p-4">
+                {error}
+              </div>
+            )}
+
+            {/* Basic Information */}
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Basic Information
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Basic Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label
-                    htmlFor="productName"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    Product Name *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Product Name *</label>
                   <input
                     type="text"
-                    id="productName"
-                    name="productName"
                     required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     placeholder="e.g., Organic Tomatoes"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="category"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    Category *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category *</label>
                   <select
-                    id="category"
-                    name="category"
                     required
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Select Category</option>
-                    <option value="vegetables">Vegetables</option>
-                    <option value="fruits">Fruits</option>
-                    <option value="grains">Grains</option>
-                    <option value="dairy">Dairy</option>
-                    <option value="herbs">Herbs</option>
-                    <option value="honey">Honey</option>
+                    {CATEGORIES.map((c) => (
+                      <option key={c} value={c} className="capitalize">
+                        {c.charAt(0).toUpperCase() + c.slice(1)}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <div className="md:col-span-2">
-                  <label
-                    htmlFor="description"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    Description *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description *</label>
                   <textarea
-                    id="description"
-                    name="description"
                     rows={4}
                     required
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     placeholder="Describe your product, growing methods, quality, etc."
                   ></textarea>
@@ -115,67 +207,51 @@ export default function AddProduct() {
               </div>
             </div>
 
-            {/* <!-- Pricing & Inventory --> */}
+            {/* Pricing & Inventory */}
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Pricing & Inventory
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Pricing & Inventory</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label
-                    htmlFor="price"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Price per Unit (৳) *
                   </label>
                   <input
                     type="number"
-                    id="price"
-                    name="price"
                     step="0.01"
                     min="0"
                     required
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     placeholder="45.00"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="unit"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    Unit *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Unit *</label>
                   <select
-                    id="unit"
-                    name="unit"
                     required
+                    value={unit}
+                    onChange={(e) => setUnit(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Select Unit</option>
-                    <option value="kg">Kilogram (kg)</option>
-                    <option value="lbs">Pounds (lbs)</option>
-                    <option value="piece">Piece</option>
-                    <option value="liter">Liter</option>
-                    <option value="dozen">Dozen</option>
-                    <option value="bundle">Bundle</option>
+                    {UNITS.map((u) => (
+                      <option key={u.value} value={u.value}>
+                        {u.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="stock"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    Available Stock *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Available Stock *</label>
                   <input
                     type="number"
-                    id="stock"
-                    name="stock"
                     min="0"
                     required
+                    value={stock}
+                    onChange={(e) => setStock(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     placeholder="100"
                   />
@@ -183,175 +259,101 @@ export default function AddProduct() {
               </div>
             </div>
 
-            {/* <!-- Product Images --> */}
+            {/* Product Images */}
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Product Images
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="images"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    Upload Images (Max 5 images) *
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary-500 transition">
-                    <input
-                      type="file"
-                      id="images"
-                      name="images"
-                      multiple
-                      accept="image/*"
-                      required
-                      className="hidden"
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Product Images</h2>
+              <label
+                htmlFor="images"
+                className="block border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary-500 transition cursor-pointer"
+              >
+                <input type="file" id="images" multiple accept="image/*" onChange={handleFileChange} className="hidden" />
+                <i className="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                <p className="text-lg font-medium text-gray-900 dark:text-white">
+                  {imageFiles.length > 0 ? `${imageFiles.length} file(s) selected` : "Click to upload images"}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Up to 5 images{editId ? " (leave empty to keep existing)" : ""}</p>
+              </label>
+
+              {imageFiles.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {imageFiles.map((file, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${i + 1}`}
+                      className="w-full aspect-square object-cover rounded-lg"
                     />
-                    <label htmlFor="images" className="cursor-pointer">
-                      <i className="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                      <p className="text-lg font-medium text-gray-900 dark:text-white">
-                        Click to upload images
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        PNG, JPG, GIF up to 10MB each
-                      </p>
-                    </label>
-                  </div>
-                  <div
-                    id="imagePreview"
-                    className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4 hidden"
-                  ></div>
+                  ))}
                 </div>
-              </div>
+              )}
+
+              {editId && imageFiles.length === 0 && existingProduct?.data?.images && (
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {existingProduct.data.images.map((img, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={i} src={img.url} alt={img.alt} className="w-full aspect-square object-cover rounded-lg" />
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* <!-- Farm Information --> */}
+            {/* Farm Information */}
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Farm Information
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Farm Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label
-                    htmlFor="farmLocation"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    Farm Location *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Farm Location *</label>
                   <input
                     type="text"
-                    id="farmLocation"
-                    name="farmLocation"
                     required
+                    value={farmLocation}
+                    onChange={(e) => setFarmLocation(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     placeholder="e.g., Sylhet, Bangladesh"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="harvestDate"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    Harvest Date
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Harvest Date</label>
                   <input
                     type="date"
-                    id="harvestDate"
-                    name="harvestDate"
+                    value={harvestDate}
+                    onChange={(e) => setHarvestDate(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   />
                 </div>
               </div>
             </div>
 
-            {/* <!-- Product Features --> */}
+            {/* Product Features */}
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Product Features
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Product Features</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <input
-                    type="checkbox"
-                    name="features[]"
-                    value="organic"
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="ml-2 text-sm">Organic</span>
-                </label>
-                <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <input
-                    type="checkbox"
-                    name="features[]"
-                    value="pesticide-free"
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="ml-2 text-sm">Pesticide Free</span>
-                </label>
-                <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <input
-                    type="checkbox"
-                    name="features[]"
-                    value="fresh"
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="ml-2 text-sm">Fresh</span>
-                </label>
-                <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <input
-                    type="checkbox"
-                    name="features[]"
-                    value="non-gmo"
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="ml-2 text-sm">Non-GMO</span>
-                </label>
-                <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <input
-                    type="checkbox"
-                    name="features[]"
-                    value="local"
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="ml-2 text-sm">Local</span>
-                </label>
-                <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <input
-                    type="checkbox"
-                    name="features[]"
-                    value="sustainable"
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="ml-2 text-sm">Sustainable</span>
-                </label>
-                <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <input
-                    type="checkbox"
-                    name="features[]"
-                    value="fair-trade"
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="ml-2 text-sm">Fair Trade</span>
-                </label>
-                <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <input
-                    type="checkbox"
-                    name="features[]"
-                    value="gluten-free"
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="ml-2 text-sm">Gluten-Free</span>
-                </label>
+                {FEATURES.map((feature) => (
+                  <label
+                    key={feature.value}
+                    className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={features.includes(feature.value)}
+                      onChange={() => toggleFeature(feature.value)}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span className="ml-2 text-sm">{feature.label}</span>
+                  </label>
+                ))}
               </div>
             </div>
 
-            {/* <!-- Submit Button --> */}
             <div>
               <button
                 type="submit"
-                className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition"
+                disabled={isSubmitting}
+                className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition"
               >
-                Add Product
+                {isSubmitting ? "Saving..." : editId ? "Save Changes" : "Add Product"}
               </button>
             </div>
           </form>

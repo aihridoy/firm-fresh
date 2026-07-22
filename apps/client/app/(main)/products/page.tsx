@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useGetProductsQuery, GetProductsParams } from "@/lib/api/endpoints/products";
 import ProductCard from "@/components/ProductCard";
 import { ProductGridSkeleton } from "@/components/Skeleton";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 const CATEGORIES = ["vegetables", "fruits", "grains", "dairy", "herbs", "honey"];
 const PRICE_RANGES: Record<string, { minPrice?: number; maxPrice?: number }> = {
@@ -54,19 +55,29 @@ export default function Products() {
   const products = data?.data ?? [];
   const pagination = data?.pagination;
 
-  const pushParams = (updates: Record<string, string | undefined>) => {
+  const pushParams = (updates: Record<string, string | undefined>, replace = false) => {
     const params = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(updates)) {
       if (value) params.set(key, value);
       else params.delete(key);
     }
-    router.push(`/products?${params.toString()}`);
+    const url = `/products?${params.toString()}`;
+    if (replace) router.replace(url, { scroll: false });
+    else router.push(url);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     pushParams({ search: searchInput || undefined, page: undefined });
   };
+
+  // Live search: apply the query as the user types, debounced
+  const debouncedSearch = useDebouncedValue(searchInput, 400);
+  useEffect(() => {
+    if (debouncedSearch.trim() === (searchParams.get("search") || "")) return;
+    pushParams({ search: debouncedSearch.trim() || undefined, page: undefined }, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
 
   const applyFilters = () => {
     pushParams({
@@ -103,7 +114,7 @@ export default function Products() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-300"
+                className="w-full pl-10 pr-4 py-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-300"
               />
               <button type="submit" aria-label="Search">
                 <i className="fas fa-search absolute left-3 top-4 text-gray-400"></i>

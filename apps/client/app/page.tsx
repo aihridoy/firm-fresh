@@ -3,8 +3,13 @@ import Choose from "@/components/Choose";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
+import HowItWorks from "@/components/HowItWorks";
+import JoinFarmerCTA from "@/components/JoinFarmerCTA";
 import Navbar from "@/components/Navbar";
 import Newsletter from "@/components/Newsletter";
+import SeasonalPicks from "@/components/SeasonalPicks";
+import Testimonials from "@/components/Testimonials";
+import TopFarmers from "@/components/TopFarmers";
 import type { Metadata } from "next";
 
 const OG_IMAGE = "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=1200&h=630&fit=crop";
@@ -34,10 +39,15 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
+      <HowItWorks />
       <Categories />
+      <TopFarmers />
       <FeaturedProducts />
+      <Testimonials />
       <Choose />
+      <SeasonalPicks />
       <Newsletter />
+      <JoinFarmerCTA />
       <Footer />
     </>
   );

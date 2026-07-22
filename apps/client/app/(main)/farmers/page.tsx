@@ -37,7 +37,7 @@ export default function FarmersPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
           <div className="text-center">
             <div className="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">{farmers.length}</div>
             <div className="text-gray-600 dark:text-gray-400">Active Farmers</div>

@@ -110,7 +110,7 @@ export default function Navbar() {
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex items-center gap-10 h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
             <div className="bg-primary-500 p-2 rounded-lg group-hover:bg-primary-600 transition">
@@ -144,7 +144,7 @@ export default function Navbar() {
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="ml-auto flex items-center space-x-4">
             {/* Search with typeahead */}
             <NavbarSearch />
 

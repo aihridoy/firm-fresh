@@ -37,6 +37,21 @@ const SORT_OPTIONS: Record<string, Record<string, 1 | -1>> = {
   featured: { purchaseCount: -1 },
 };
 
+// Attach avgRating/reviewCount to a list of product docs with one aggregate
+const attachRatings = async (products: InstanceType<typeof Product>[]) => {
+  const ids = products.map((p) => p._id);
+  const stats = await Review.aggregate([
+    { $match: { product: { $in: ids } } },
+    { $group: { _id: "$product", avgRating: { $avg: "$rating" }, count: { $sum: 1 } } },
+  ]);
+  const byId = new Map(stats.map((s) => [String(s._id), s]));
+  return products.map((p) => {
+    const s = byId.get(String(p._id));
+    // Leave avgRating undefined for unreviewed products so cards don't show 0.0
+    return s ? { ...p.toObject(), avgRating: s.avgRating, reviewCount: s.count } : p.toObject();
+  });
+};
+
 export const listProducts = async (req: Request, res: Response) => {
   try {
     const {
@@ -85,7 +100,7 @@ export const listProducts = async (req: Request, res: Response) => {
 
     res.send({
       status: true,
-      data: products,
+      data: await attachRatings(products),
       pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) },
     });
   } catch (err) {
@@ -100,7 +115,7 @@ export const getFeaturedProducts = async (_req: Request, res: Response) => {
       .sort({ purchaseCount: -1, createdAt: -1 })
       .limit(8);
 
-    res.send({ status: true, data: products });
+    res.send({ status: true, data: await attachRatings(products) });
   } catch (err) {
     res.status(500).send({ status: false, error: (err as Error).message });
   }

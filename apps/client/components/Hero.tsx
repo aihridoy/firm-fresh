@@ -47,19 +47,22 @@ export default function Hero() {
                 className="flex-1 min-w-0 px-6 py-4 bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-800 dark:placeholder-gray-400 text-lg focus:outline-none"
               />
               <div className="flex border-t sm:border-t-0 border-gray-300 dark:border-gray-600">
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  aria-label="Category"
-                  className="flex-1 sm:flex-none min-w-0 px-4 py-4 bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-800 sm:border-l border-gray-300 dark:border-gray-600 focus:outline-none capitalize"
-                >
-                  <option value="">All Categories</option>
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c} className="capitalize">
-                      {c}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative flex-1 sm:flex-none min-w-0">
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    aria-label="Category"
+                    className="w-full appearance-none pl-4 pr-10 py-4 bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-800 sm:border-l border-gray-300 dark:border-gray-600 focus:outline-none capitalize"
+                  >
+                    <option value="">All Categories</option>
+                    {CATEGORIES.map((c) => (
+                      <option key={c} value={c} className="capitalize">
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400 pointer-events-none"></i>
+                </div>
                 <button
                   type="submit"
                   aria-label="Search"

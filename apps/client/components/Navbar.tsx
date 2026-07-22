@@ -110,7 +110,7 @@ export default function Navbar() {
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-10 h-16">
+        <div className="flex items-center gap-4 lg:gap-10 h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
             <div className="bg-primary-500 p-2 rounded-lg group-hover:bg-primary-600 transition">
@@ -120,7 +120,7 @@ export default function Navbar() {
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 FarmFresh
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="hidden sm:block text-xs text-gray-500 dark:text-gray-400">
                 Local Farmer Booking
               </p>
             </div>
@@ -144,7 +144,7 @@ export default function Navbar() {
           </div>
 
           {/* User Actions */}
-          <div className="ml-auto flex items-center space-x-4">
+          <div className="ml-auto flex items-center space-x-1 sm:space-x-4">
             {/* Search with typeahead */}
             <NavbarSearch />
 
@@ -152,7 +152,7 @@ export default function Navbar() {
             {isClient && isAuthenticated && (
               <Link
                 href="/favorites"
-                className="p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
+                className="hidden sm:block p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
                 aria-label="Favorites"
               >
                 <i className="fas fa-heart text-xl"></i>
@@ -219,7 +219,7 @@ export default function Navbar() {
                         {user.firstName}
                       </span>
                       <i
-                        className={`fas fa-chevron-down text-sm transition-transform ${
+                        className={`hidden sm:inline fas fa-chevron-down text-sm transition-transform ${
                           isUserMenuOpen ? "rotate-180" : ""
                         }`}
                       ></i>

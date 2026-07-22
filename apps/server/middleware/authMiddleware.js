@@ -75,6 +75,17 @@ exports.isCustomer = (req, res, next) => {
   next();
 };
 
+// Middleware to check if user is an admin
+exports.isAdmin = (req, res, next) => {
+  if (req.user.userType !== "admin") {
+    return res.status(403).send({
+      status: false,
+      error: "Access denied. Only admins can access this resource.",
+    });
+  }
+  next();
+};
+
 // Middleware to check if user is accessing their own resource
 exports.isOwner = (req, res, next) => {
   const userId = req.params.id || req.params.userId;

@@ -66,7 +66,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className="absolute top-3 right-3">
           <button
             onClick={handleToggleFavorite}
-            className="bg-white dark:bg-gray-800 p-2 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            className="h-9 w-9 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             aria-label="Toggle favorite"
           >
             <i className={`${isFavorited ? "fas text-red-500" : "far text-gray-600 dark:text-gray-400"} fa-heart`}></i>

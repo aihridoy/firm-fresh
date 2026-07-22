@@ -14,6 +14,7 @@ const cartRoutes = require("./routes/cartRoute").default;
 const orderRoutes = require("./routes/orderRoute").default;
 const reviewRoutes = require("./routes/reviewRoute").default;
 const favoriteRoutes = require("./routes/favoriteRoute").default;
+const adminRoutes = require("./routes/adminRoute").default;
 
 // Middleware
 app.use(helmet());
@@ -49,6 +50,7 @@ app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
 app.use("/api", reviewRoutes);
 app.use("/api", favoriteRoutes);
+app.use("/api", adminRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {

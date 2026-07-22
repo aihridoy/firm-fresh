@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "ulimit -n 10240 2>/dev/null; next dev --turbopack",
+    "dev": "trap 'exit 0' INT TERM; ulimit -n 10240 2>/dev/null; next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"

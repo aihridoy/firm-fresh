@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Contact() {
   return (
     <div className="bg-gray-100 dark:bg-gray-800 py-16">
@@ -17,13 +19,13 @@ export default function Contact() {
             <i className="fas fa-envelope mr-2"></i>
             Contact Us
           </a>
-          <a
-            href="register.html"
+          <Link
+            href="/register"
             className="inline-flex items-center justify-center px-6 py-3 border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900 rounded-lg font-medium transition"
           >
             <i className="fas fa-user-plus mr-2"></i>
             Join as Farmer
-          </a>
+          </Link>
         </div>
       </div>
     </div>

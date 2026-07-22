@@ -1,25 +1,33 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useTheme } from "@/hooks/use-theme";
 import {
-  logout,
   selectCurrentUser,
   selectIsAuthenticated,
 } from "@/lib/api/endpoints/userSlice";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useAppSelector } from "@/lib/hooks";
+import { useLogoutUserMutation } from "@/lib/api/endpoints/users";
+import { useGetCartQuery } from "@/lib/api/endpoints/cart";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Navbar() {
+  const router = useRouter();
   const { theme, toggleTheme, mounted } = useTheme();
   const user = useAppSelector(selectCurrentUser);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const dispatch = useAppDispatch();
+  const [logoutUser] = useLogoutUserMutation();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mobileSearchQuery, setMobileSearchQuery] = useState("");
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const { data: cartData } = useGetCartQuery(undefined, { skip: !isAuthenticated });
+  const cartCount = cartData?.data.items.length ?? 0;
 
   // Ensure component is mounted on client
   useEffect(() => {
@@ -42,8 +50,19 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    dispatch(logout());
+    const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refreshToken") : null;
+    logoutUser(refreshToken);
     setIsUserMenuOpen(false);
+  };
+
+  const handleSearch = (e: React.FormEvent, query: string) => {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/products?search=${encodeURIComponent(query.trim())}`);
+      setSearchQuery("");
+      setMobileSearchQuery("");
+      setIsMobileMenuOpen(false);
+    }
   };
 
   // Get user initials for avatar fallback
@@ -59,6 +78,24 @@ export default function Navbar() {
     }
     return null;
   };
+
+  const isFarmer = isClient && isAuthenticated && user?.userType === "farmer";
+  const isCustomer = isClient && isAuthenticated && user?.userType === "customer";
+
+  const mainNavLinks = isFarmer
+    ? [
+        { href: "/", label: "Home" },
+        { href: "/add-product", label: "Add Product" },
+        { href: "/manage-list", label: "Manage Products" },
+        { href: "/about-us", label: "About" },
+      ]
+    : [
+        { href: "/", label: "Home" },
+        { href: "/products", label: "Products" },
+        { href: "/farmers", label: "Farmers" },
+        ...(isCustomer ? [{ href: "/bookings", label: "My Orders" }] : []),
+        { href: "/about-us", label: "About" },
+      ];
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
@@ -81,43 +118,47 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/"
-              className="text-primary-600 dark:text-primary-400 font-medium hover:text-primary-700 dark:hover:text-primary-300 transition"
-            >
-              Home
-            </Link>
-            <Link
-              href="/products"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
-            >
-              Products
-            </Link>
-            <Link
-              href="/farmers"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
-            >
-              Farmers
-            </Link>
-            <Link
-              href="/about-us"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
-            >
-              About
-            </Link>
+            {mainNavLinks.map((link, i) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={
+                  i === 0
+                    ? "text-primary-600 dark:text-primary-400 font-medium hover:text-primary-700 dark:hover:text-primary-300 transition"
+                    : "text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
+                }
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
             {/* Search */}
-            <div className="hidden lg:block relative">
+            <form onSubmit={(e) => handleSearch(e, searchQuery)} className="hidden lg:block relative">
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products..."
                 className="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
               />
-              <i className="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-            </div>
+              <button type="submit" aria-label="Search" className="absolute left-3 top-2.5">
+                <i className="fas fa-search text-gray-400"></i>
+              </button>
+            </form>
+
+            {/* Favorites - Only render after client mount */}
+            {isClient && isAuthenticated && (
+              <Link
+                href="/favorites"
+                className="p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
+                aria-label="Favorites"
+              >
+                <i className="fas fa-heart text-xl"></i>
+              </Link>
+            )}
 
             {/* Cart - Only render after client mount */}
             {isClient && isAuthenticated && (
@@ -126,9 +167,11 @@ export default function Navbar() {
                 className="relative p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
               >
                 <i className="fas fa-shopping-cart text-xl"></i>
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                  3
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
             )}
 
@@ -213,31 +256,31 @@ export default function Navbar() {
 
                           {user.userType === "farmer" && (
                             <Link
-                              href="/dashboard"
+                              href="/manage-list"
                               onClick={() => setIsUserMenuOpen(false)}
                               className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                             >
                               <i className="fas fa-tachometer-alt w-5"></i>
-                              <span className="ml-3">Dashboard</span>
+                              <span className="ml-3">Manage Products</span>
                             </Link>
                           )}
 
                           <Link
-                            href="/orders"
+                            href="/bookings"
                             onClick={() => setIsUserMenuOpen(false)}
                             className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                           >
                             <i className="fas fa-shopping-bag w-5"></i>
-                            <span className="ml-3">My Orders</span>
+                            <span className="ml-3">{user.userType === "farmer" ? "Orders" : "My Orders"}</span>
                           </Link>
 
                           <Link
-                            href="/settings"
+                            href="/favorites"
                             onClick={() => setIsUserMenuOpen(false)}
                             className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                           >
-                            <i className="fas fa-cog w-5"></i>
-                            <span className="ml-3">Settings</span>
+                            <i className="fas fa-heart w-5"></i>
+                            <span className="ml-3">Favorites</span>
                           </Link>
                         </div>
 
@@ -288,35 +331,40 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700 animate-in slide-in-from-top duration-200">
+            <form onSubmit={(e) => handleSearch(e, mobileSearchQuery)} className="relative mb-3 px-1">
+              <input
+                type="text"
+                value={mobileSearchQuery}
+                onChange={(e) => setMobileSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
+              />
+              <button type="submit" aria-label="Search" className="absolute left-4 top-2.5">
+                <i className="fas fa-search text-gray-400"></i>
+              </button>
+            </form>
+
             <div className="space-y-2">
-              <Link
-                href="/"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
-              >
-                Home
-              </Link>
-              <Link
-                href="/products"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
-              >
-                Products
-              </Link>
-              <Link
-                href="/farmers"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
-              >
-                Farmers
-              </Link>
-              <Link
-                href="/about-us"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
-              >
-                About
-              </Link>
+              {mainNavLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              {isClient && isAuthenticated && (
+                <Link
+                  href="/favorites"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
+                >
+                  Favorites
+                </Link>
+              )}
 
               {/* Mobile Auth Buttons - Only render after client mount */}
               {isClient && !isAuthenticated && (

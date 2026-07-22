@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
@@ -34,24 +36,24 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <a href="#" className="hover:text-white">
+                <Link href="/" className="hover:text-white">
                   Home
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="products.html" className="hover:text-white">
+                <Link href="/products" className="hover:text-white">
                   Products
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="farmers.html" className="hover:text-white">
+                <Link href="/farmers" className="hover:text-white">
                   Farmers
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="about.html" className="hover:text-white">
+                <Link href="/about-us" className="hover:text-white">
                   About Us
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -60,19 +62,19 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">For Farmers</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <a href="register.html" className="hover:text-white">
+                <Link href="/register" className="hover:text-white">
                   Join as Farmer
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="create.html" className="hover:text-white">
+                <Link href="/add-product" className="hover:text-white">
                   Add Products
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="manageList.html" className="hover:text-white">
+                <Link href="/manage-list" className="hover:text-white">
                   Manage Listings
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" className="hover:text-white">

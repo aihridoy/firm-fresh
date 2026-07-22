@@ -177,4 +177,67 @@ const sendOrderConfirmationEmail = async (to, order) => {
   }
 };
 
-module.exports = { sendPasswordResetEmail, sendOrderConfirmationEmail };
+// Send newsletter welcome email
+const sendNewsletterWelcomeEmail = async (to) => {
+  try {
+    const data = await resend.emails.send({
+      from: process.env.EMAIL_FROM,
+      to: [to],
+      subject: "Welcome to the FarmFresh Newsletter",
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Welcome to FarmFresh</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <div style="background: white; width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                <span style="font-size: 30px;">🌱</span>
+              </div>
+              <h1 style="color: white; margin: 0; font-size: 28px;">FarmFresh</h1>
+            </div>
+
+            <div style="background: #f9fafb; padding: 40px 30px; border-radius: 0 0 10px 10px;">
+              <h2 style="color: #1f2937; margin-top: 0;">You're on the list! 🎉</h2>
+
+              <p style="color: #4b5563; font-size: 16px;">
+                Thanks for subscribing to the FarmFresh newsletter. From now on you'll be the
+                first to hear about:
+              </p>
+
+              <ul style="color: #4b5563; font-size: 16px; padding-left: 20px;">
+                <li>New farmers joining the platform</li>
+                <li>Seasonal produce as it's harvested</li>
+                <li>Special offers and fresh deals</li>
+              </ul>
+
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="${process.env.FRONTEND_URL}/products"
+                   style="background: #16a34a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px;">
+                  Browse Fresh Produce
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+              <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
+                © ${new Date().getFullYear()} FarmFresh. All rights reserved.<br>
+                Local Farmer Booking Platform
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending newsletter welcome email:", error);
+    throw new Error("Failed to send newsletter welcome email");
+  }
+};
+
+module.exports = { sendPasswordResetEmail, sendOrderConfirmationEmail, sendNewsletterWelcomeEmail };

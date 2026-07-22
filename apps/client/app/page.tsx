@@ -5,6 +5,29 @@ import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
 import Newsletter from "@/components/Newsletter";
+import type { Metadata } from "next";
+
+const OG_IMAGE = "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=1200&h=630&fit=crop";
+
+export const metadata: Metadata = {
+  title: { absolute: "FarmFresh — Fresh Produce Direct from Local Farmers" },
+  description:
+    "Buy fresh, farm-direct fruits, vegetables, grains, dairy, honey and herbs from local Bangladeshi farmers on FarmFresh.",
+  openGraph: {
+    title: "FarmFresh — Fresh Produce Direct from Local Farmers",
+    description:
+      "Buy fresh, farm-direct fruits, vegetables, grains, dairy, honey and herbs from local Bangladeshi farmers on FarmFresh.",
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Fresh produce from FarmFresh" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FarmFresh — Fresh Produce Direct from Local Farmers",
+    description:
+      "Buy fresh, farm-direct fruits, vegetables, grains, dairy, honey and herbs from local Bangladeshi farmers on FarmFresh.",
+    images: [OG_IMAGE],
+  },
+};
 
 export default function Home() {
   return (

@@ -6,6 +6,7 @@ import { useGetAdminOrdersQuery, useUpdateAdminOrderStatusMutation, AdminOrder }
 import { OrderStatus } from "@/lib/api/endpoints/orders";
 import { ListSkeleton } from "@/components/Skeleton";
 import Pager from "../Pager";
+import AdminSelect from "../AdminSelect";
 
 const STATUSES: OrderStatus[] = ["pending", "confirmed", "shipped", "delivered", "canceled"];
 
@@ -39,13 +40,13 @@ export default function AdminOrders() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Manage Orders</h1>
-        <select
+        <AdminSelect
           value={status}
           onChange={(e) => {
             setStatus(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm capitalize"
+          aria-label="Filter by status"
         >
           <option value="">All Statuses</option>
           {STATUSES.map((s) => (
@@ -53,7 +54,7 @@ export default function AdminOrders() {
               {s}
             </option>
           ))}
-        </select>
+        </AdminSelect>
       </div>
 
       {isLoading ? (
@@ -93,10 +94,10 @@ export default function AdminOrders() {
                       </span>
                     </td>
                     <td className="py-2.5">
-                      <select
+                      <AdminSelect
+                        small
                         value={order.status}
                         onChange={(e) => handleStatusChange(order, e.target.value as OrderStatus)}
-                        className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-xs capitalize"
                         aria-label="Update order status"
                       >
                         {STATUSES.map((s) => (
@@ -104,7 +105,7 @@ export default function AdminOrders() {
                             {s}
                           </option>
                         ))}
-                      </select>
+                      </AdminSelect>
                     </td>
                   </tr>
                 ))}

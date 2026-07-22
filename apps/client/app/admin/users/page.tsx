@@ -12,6 +12,7 @@ import { selectCurrentUser, User } from "@/lib/api/endpoints/userSlice";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ListSkeleton } from "@/components/Skeleton";
 import Pager from "../Pager";
+import AdminSelect from "../AdminSelect";
 
 const ROLE_CLASSES: Record<string, string> = {
   admin: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
@@ -67,19 +68,19 @@ export default function AdminUsers() {
           placeholder="Search by name or email..."
           className="flex-1 min-w-52 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
-        <select
+        <AdminSelect
           value={role}
           onChange={(e) => {
             setRole(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
+          aria-label="Filter by role"
         >
           <option value="">All Roles</option>
           <option value="customer">Customer</option>
           <option value="farmer">Farmer</option>
           <option value="admin">Admin</option>
-        </select>
+        </AdminSelect>
       </div>
 
       {isLoading ? (
@@ -119,17 +120,17 @@ export default function AdminUsers() {
                       </td>
                       <td className="py-2.5">
                         <div className="flex items-center gap-2">
-                          <select
+                          <AdminSelect
+                            small
                             value={user.userType}
                             disabled={isAdmin}
                             onChange={(e) => handleRoleChange(user, e.target.value)}
-                            className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-xs disabled:opacity-40"
                             aria-label="Change role"
                           >
                             <option value="customer">Customer</option>
                             <option value="farmer">Farmer</option>
                             <option value="admin">Admin</option>
-                          </select>
+                          </AdminSelect>
                           <button
                             onClick={() => handleDelete(user)}
                             disabled={isAdmin}

@@ -12,6 +12,7 @@ import { useLogoutUserMutation } from "@/lib/api/endpoints/users";
 import { useGetCartQuery } from "@/lib/api/endpoints/cart";
 import Link from "next/link";
 import Image from "next/image";
+import NavbarSearch from "@/components/NavbarSearch";
 
 export default function Navbar() {
   const router = useRouter();
@@ -23,7 +24,6 @@ export default function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [mobileSearchQuery, setMobileSearchQuery] = useState("");
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +61,6 @@ export default function Navbar() {
     e.preventDefault();
     if (query.trim()) {
       router.push(`/products?search=${encodeURIComponent(query.trim())}`);
-      setSearchQuery("");
       setMobileSearchQuery("");
       setIsMobileMenuOpen(false);
     }
@@ -137,19 +136,8 @@ export default function Navbar() {
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
-            {/* Search */}
-            <form onSubmit={(e) => handleSearch(e, searchQuery)} className="hidden lg:block relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
-              />
-              <button type="submit" aria-label="Search" className="absolute left-3 top-2.5">
-                <i className="fas fa-search text-gray-400"></i>
-              </button>
-            </form>
+            {/* Search with typeahead */}
+            <NavbarSearch />
 
             {/* Favorites - Only render after client mount */}
             {isClient && isAuthenticated && (

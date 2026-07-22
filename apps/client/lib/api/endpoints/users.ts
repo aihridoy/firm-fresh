@@ -104,16 +104,16 @@ export const usersApi = api.injectEndpoints({
           : [{ type: "User", id: "FARMERS_LIST" }],
     }),
 
-    // Update user profile
+    // Update user profile (formData supports an optional profilePicture file)
     updateUser: builder.mutation({
-      query: ({ id, ...userData }) => ({
+      query: ({ id, formData }: { id: string; formData: FormData }) => ({
         url: `/user/${id}`,
         method: "PUT",
-        body: userData,
+        body: formData,
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "User", id }],
       // Update stored user data after successful update
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           if (data.status) {

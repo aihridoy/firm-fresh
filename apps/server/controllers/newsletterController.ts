@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Newsletter } from "../models/newsletterModel";
+const { sendNewsletterWelcomeEmail } = require("../utils/email");
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -16,7 +17,15 @@ export const subscribe = async (req: Request, res: Response) => {
     }
 
     await Newsletter.create({ email });
-    res.status(201).send({ status: true, message: "Subscribed! Watch your inbox for fresh updates" });
+
+    // Welcome email is best-effort: the subscription itself already succeeded
+    try {
+      await sendNewsletterWelcomeEmail(email);
+    } catch (emailErr) {
+      console.error("Newsletter welcome email failed:", (emailErr as Error).message);
+    }
+
+    res.status(201).send({ status: true, message: "Subscribed! A welcome email is on its way" });
   } catch (err) {
     res.status(500).send({ status: false, error: (err as Error).message });
   }

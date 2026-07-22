@@ -84,20 +84,30 @@ export default function Navbar() {
   const isFarmer = isClient && isAuthenticated && user?.userType === "farmer";
   const isCustomer = isClient && isAuthenticated && user?.userType === "customer";
 
-  const mainNavLinks = isFarmer
+  const isAdmin = isClient && isAuthenticated && user?.userType === "admin";
+
+  const mainNavLinks = isAdmin
     ? [
         { href: "/", label: "Home" },
-        { href: "/add-product", label: "Add Product" },
-        { href: "/manage-list", label: "Manage Products" },
-        { href: "/about-us", label: "About" },
+        { href: "/admin/dashboard", label: "Dashboard" },
+        { href: "/admin/users", label: "Manage Users" },
+        { href: "/admin/products", label: "Manage Products" },
+        { href: "/admin/orders", label: "Manage Orders" },
       ]
-    : [
-        { href: "/", label: "Home" },
-        { href: "/products", label: "Products" },
-        { href: "/farmers", label: "Farmers" },
-        ...(isCustomer ? [{ href: "/bookings", label: "My Orders" }] : []),
-        { href: "/about-us", label: "About" },
-      ];
+    : isFarmer
+      ? [
+          { href: "/", label: "Home" },
+          { href: "/add-product", label: "Add Product" },
+          { href: "/manage-list", label: "Manage Products" },
+          { href: "/about-us", label: "About" },
+        ]
+      : [
+          { href: "/", label: "Home" },
+          { href: "/products", label: "Products" },
+          { href: "/farmers", label: "Farmers" },
+          ...(isCustomer ? [{ href: "/bookings", label: "My Orders" }] : []),
+          { href: "/about-us", label: "About" },
+        ];
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
@@ -229,8 +239,14 @@ export default function Navbar() {
                           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             {user.email}
                           </p>
-                          <span className="inline-block mt-1 px-2 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300">
-                            {user.userType === "farmer" ? "Farmer" : "Customer"}
+                          <span
+                            className={`inline-block mt-1 px-2 py-1 text-xs font-medium rounded-full ${
+                              user.userType === "admin"
+                                ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                                : "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300"
+                            }`}
+                          >
+                            {user.userType === "admin" ? "Admin" : user.userType === "farmer" ? "Farmer" : "Customer"}
                           </span>
                         </div>
 
@@ -244,6 +260,17 @@ export default function Navbar() {
                             <i className="fas fa-user w-5"></i>
                             <span className="ml-3">My Profile</span>
                           </Link>
+
+                          {user.userType === "admin" && (
+                            <Link
+                              href="/admin/dashboard"
+                              onClick={() => setIsUserMenuOpen(false)}
+                              className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            >
+                              <i className="fas fa-chart-line w-5"></i>
+                              <span className="ml-3">Admin Dashboard</span>
+                            </Link>
+                          )}
 
                           {user.userType === "farmer" && (
                             <Link

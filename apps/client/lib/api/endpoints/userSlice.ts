@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // Define the User type
 export interface User {
   _id: string;
-  userType: "customer" | "farmer";
+  userType: "customer" | "farmer" | "admin";
   firstName: string;
   lastName: string;
   email: string;

@@ -90,6 +90,16 @@ const farmers = [
 
 const img = (id: string, alt: string) => ({ url: `https://images.unsplash.com/${id}?w=800&auto=format&fit=crop`, alt });
 
+const admin = {
+  userType: "admin" as const,
+  firstName: "Admin",
+  lastName: "User",
+  email: "aihridoy976@gmail.com",
+  phone: "01700000000",
+  address: "Dhaka, Bangladesh",
+  password: "Ash@358241",
+};
+
 const customers = [
   {
     userType: "customer" as const,
@@ -471,12 +481,15 @@ async function seed() {
   await connectDB();
 
   console.log("Clearing existing seed data...");
-  const seedEmails = [...farmers.map((f) => f.email), ...customers.map((c) => c.email)];
+  const seedEmails = [...farmers.map((f) => f.email), ...customers.map((c) => c.email), admin.email];
   const oldSeedUsers = await User.find({ email: { $in: seedEmails } }, "_id");
   await Order.deleteMany({ user: { $in: oldSeedUsers.map((u) => u._id) } });
   await Review.deleteMany({}); // reviews reference reseeded products, so clear all
   await Product.deleteMany({});
   await User.deleteMany({ email: { $in: seedEmails } });
+
+  console.log("Creating admin...");
+  await User.create(admin);
 
   console.log("Creating farmers...");
   const createdFarmers = [];

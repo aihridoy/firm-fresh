@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     // Account type
     userType: {
       type: String,
-      enum: ["customer", "farmer"],
+      enum: ["customer", "farmer", "admin"],
       required: true,
       default: "customer",
     },

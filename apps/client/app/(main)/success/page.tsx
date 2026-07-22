@@ -6,6 +6,7 @@ import { useGetOrderByIdQuery } from "@/lib/api/endpoints/orders";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser } from "@/lib/api/endpoints/userSlice";
 import { generateInvoicePdf } from "@/lib/generateInvoicePdf";
+import { PanelSkeleton } from "@/components/Skeleton";
 
 export default function SuccessPage() {
   const searchParams = useSearchParams();
@@ -27,7 +28,7 @@ export default function SuccessPage() {
   }
 
   if (isLoading || !order) {
-    return <p className="text-center text-gray-500 dark:text-gray-400 py-24">Loading order...</p>;
+    return <PanelSkeleton />;
   }
 
   return (

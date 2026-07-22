@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGetProductsQuery, GetProductsParams } from "@/lib/api/endpoints/products";
 import ProductCard from "@/components/ProductCard";
+import { ProductGridSkeleton } from "@/components/Skeleton";
 
 const CATEGORIES = ["vegetables", "fruits", "grains", "dairy", "herbs", "honey"];
 const PRICE_RANGES: Record<string, { minPrice?: number; maxPrice?: number }> = {
@@ -219,7 +220,9 @@ export default function Products() {
               </select>
             </div>
 
-            {isLoading && <p className="text-center text-gray-500 dark:text-gray-400 py-12">Loading products...</p>}
+            {isLoading && (
+              <ProductGridSkeleton count={9} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" />
+            )}
             {isError && <p className="text-center text-red-500 py-12">Couldn&apos;t load products. Please try again.</p>}
             {!isLoading && !isError && products.length === 0 && (
               <p className="text-center text-gray-500 dark:text-gray-400 py-12">No products match your filters.</p>

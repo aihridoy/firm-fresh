@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useGetAllFarmersQuery } from "@/lib/api/endpoints/users";
+import { FarmerGridSkeleton } from "@/components/Skeleton";
 
 interface Farmer {
   _id: string;
@@ -59,7 +60,7 @@ export default function FarmersPage() {
           </div>
         </div>
 
-        {isLoading && <p className="text-center text-gray-500 dark:text-gray-400 py-12">Loading farmers...</p>}
+        {isLoading && <FarmerGridSkeleton count={6} />}
         {isError && <p className="text-center text-red-500 py-12">Couldn&apos;t load farmers. Please try again.</p>}
         {!isLoading && !isError && farmers.length === 0 && (
           <p className="text-center text-gray-500 dark:text-gray-400 py-12">No farmers registered yet.</p>

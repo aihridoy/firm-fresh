@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useGetFeaturedProductsQuery } from "@/lib/api/endpoints/products";
 import ProductCard from "@/components/ProductCard";
+import { ProductGridSkeleton } from "@/components/Skeleton";
 
 export default function FeaturedProducts() {
   const { data, isLoading, isError } = useGetFeaturedProductsQuery();
@@ -24,9 +25,7 @@ export default function FeaturedProducts() {
           </Link>
         </div>
 
-        {isLoading && (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-12">Loading products...</p>
-        )}
+        {isLoading && <ProductGridSkeleton count={4} />}
 
         {isError && (
           <p className="text-center text-red-500 py-12">Couldn&apos;t load featured products. Please try again later.</p>

@@ -5,6 +5,7 @@ import { useGetFavoritesQuery } from "@/lib/api/endpoints/favorites";
 import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import ProductCard from "@/components/ProductCard";
+import { ProductGridSkeleton } from "@/components/Skeleton";
 
 export default function FavoritesPage() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -30,7 +31,7 @@ export default function FavoritesPage() {
         <p className="text-gray-600 dark:text-gray-400">Products you&apos;ve saved for later</p>
       </div>
 
-      {isLoading && <p className="text-center text-gray-500 dark:text-gray-400 py-12">Loading favorites...</p>}
+      {isLoading && <ProductGridSkeleton count={8} />}
 
       {!isLoading && favorites.length === 0 && (
         <div className="text-center py-24">

@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useGetCartQuery, useUpdateCartItemMutation, useRemoveFromCartMutation } from "@/lib/api/endpoints/cart";
 import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
+import { ListSkeleton } from "@/components/Skeleton";
 
 export default function Cart() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -57,7 +58,12 @@ export default function Cart() {
         </div>
 
         {isLoading ? (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-12">Loading cart...</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <ListSkeleton rows={3} />
+            </div>
+            <ListSkeleton rows={1} />
+          </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Cart Items */}

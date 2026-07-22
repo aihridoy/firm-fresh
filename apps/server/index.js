@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 const { connectDB } = require("./utils/db");
@@ -9,9 +11,23 @@ const { port } = require("./utils/config");
 const userRoutes = require("./routes/userRoute");
 
 // Middleware
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Rate limit auth endpoints (login, register, password reset) against brute-force
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { status: false, error: "Too many requests, please try again later." },
+});
+app.use("/api/login", authLimiter);
+app.use("/api/register", authLimiter);
+app.use("/api/forgot-password", authLimiter);
+app.use("/api/reset-password", authLimiter);
 
 // Connect to database
 connectDB();

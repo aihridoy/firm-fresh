@@ -86,13 +86,11 @@ export default function Navbar() {
 
   const isAdmin = isClient && isAuthenticated && user?.userType === "admin";
 
+  // Admin management links live in the admin sidebar, not the navbar
   const mainNavLinks = isAdmin
     ? [
         { href: "/", label: "Home" },
         { href: "/admin/dashboard", label: "Dashboard" },
-        { href: "/admin/users", label: "Manage Users" },
-        { href: "/admin/products", label: "Manage Products" },
-        { href: "/admin/orders", label: "Manage Orders" },
       ]
     : isFarmer
       ? [

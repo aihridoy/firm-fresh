@@ -11,6 +11,7 @@ import {
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ListSkeleton } from "@/components/Skeleton";
 import Pager from "../Pager";
+import AdminSelect from "../AdminSelect";
 
 const CATEGORIES = ["vegetables", "fruits", "grains", "dairy", "herbs", "honey"];
 
@@ -62,13 +63,13 @@ export default function AdminProducts() {
           placeholder="Search by product name..."
           className="flex-1 min-w-52 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
-        <select
+        <AdminSelect
           value={category}
           onChange={(e) => {
             setCategory(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm capitalize"
+          aria-label="Filter by category"
         >
           <option value="">All Categories</option>
           {CATEGORIES.map((c) => (
@@ -76,19 +77,19 @@ export default function AdminProducts() {
               {c}
             </option>
           ))}
-        </select>
-        <select
+        </AdminSelect>
+        <AdminSelect
           value={published}
           onChange={(e) => {
             setPublished(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
+          aria-label="Filter by status"
         >
           <option value="">All Status</option>
           <option value="true">Published</option>
           <option value="false">Unpublished</option>
-        </select>
+        </AdminSelect>
       </div>
 
       {isLoading ? (

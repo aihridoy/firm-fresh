@@ -75,4 +75,106 @@ const sendPasswordResetEmail = async (to, resetToken, userName) => {
   }
 };
 
-module.exports = { sendPasswordResetEmail };
+// Send order confirmation email with a full order breakdown.
+// ponytail: HTML summary, not a PDF attachment - client already generates a
+// downloadable PDF invoice in-app (success/bookings pages). Duplicating PDF
+// rendering here would mean keeping two invoice layouts in sync for no real
+// benefit. Upgrade path if a literal PDF-attached email is ever required:
+// have the client POST its generated PDF blob to a new endpoint and attach
+// that buffer via `attachments` below.
+const sendOrderConfirmationEmail = async (to, order) => {
+  const itemsHtml = order.items
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${item.productName}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity} ${item.unit}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">৳${item.price * item.quantity}</td>
+        </tr>
+      `
+    )
+    .join("");
+
+  try {
+    const data = await resend.emails.send({
+      from: process.env.EMAIL_FROM,
+      to: [to],
+      subject: `Order Confirmed - ${order.orderNumber}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Order Confirmed</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <div style="background: white; width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                <span style="font-size: 30px;">🌱</span>
+              </div>
+              <h1 style="color: white; margin: 0; font-size: 28px;">FarmFresh</h1>
+            </div>
+
+            <div style="background: #f9fafb; padding: 40px 30px; border-radius: 0 0 10px 10px;">
+              <h2 style="color: #1f2937; margin-top: 0;">Thank you for your order!</h2>
+              <p style="color: #4b5563; font-size: 16px;">
+                Order <strong>${order.orderNumber}</strong> has been placed successfully.
+              </p>
+
+              <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                  <tr>
+                    <th style="padding: 8px; text-align: left; border-bottom: 2px solid #16a34a;">Item</th>
+                    <th style="padding: 8px; text-align: center; border-bottom: 2px solid #16a34a;">Qty</th>
+                    <th style="padding: 8px; text-align: right; border-bottom: 2px solid #16a34a;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsHtml}
+                </tbody>
+              </table>
+
+              <table style="width: 100%; margin-top: 10px;">
+                <tr>
+                  <td style="padding: 4px 8px; color: #6b7280;">Subtotal</td>
+                  <td style="padding: 4px 8px; text-align: right;">৳${order.subtotal}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 4px 8px; color: #6b7280;">Delivery Fee</td>
+                  <td style="padding: 4px 8px; text-align: right;">৳${order.deliveryFee}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 4px 8px; color: #6b7280;">Service Fee</td>
+                  <td style="padding: 4px 8px; text-align: right;">৳${order.serviceFee}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; font-weight: bold; border-top: 2px solid #16a34a;">Total</td>
+                  <td style="padding: 8px; text-align: right; font-weight: bold; border-top: 2px solid #16a34a;">৳${order.totalAmount}</td>
+                </tr>
+              </table>
+
+              <p style="color: #4b5563; font-size: 14px; margin-top: 20px;">
+                Delivering to: ${order.deliveryAddress}
+              </p>
+
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+              <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
+                © ${new Date().getFullYear()} FarmFresh. All rights reserved.<br>
+                Local Farmer Booking Platform
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending order confirmation email:", error);
+    throw new Error("Failed to send order confirmation email");
+  }
+};
+
+module.exports = { sendPasswordResetEmail, sendOrderConfirmationEmail };

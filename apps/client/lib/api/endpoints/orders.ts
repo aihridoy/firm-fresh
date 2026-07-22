@@ -43,12 +43,14 @@ export interface CreateOrderPayload {
 interface OrdersPageParams {
   page?: number;
   limit?: number;
+  status?: OrderStatus;
 }
 
 const pageParams = (params?: OrdersPageParams) => {
   const query: Record<string, string> = {};
   if (params?.page) query.page = String(params.page);
   if (params?.limit) query.limit = String(params.limit);
+  if (params?.status) query.status = params.status;
   return query;
 };
 

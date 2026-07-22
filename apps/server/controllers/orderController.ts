@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Order, generateOrderNumber, ORDER_STATUSES, OrderStatus } from "../models/orderModel";
 import { Cart } from "../models/cartModel";
 import { Product } from "../models/productModel";
+import { sendOrderConfirmationEmail } from "../utils/email";
 
 const DELIVERY_FEE = 50;
 const SERVICE_FEE = 25;
@@ -79,6 +80,12 @@ export const createOrder = async (req: Request, res: Response) => {
       await cart.save();
     }
 
+    try {
+      await sendOrderConfirmationEmail(req.user.email, order);
+    } catch (emailErr) {
+      console.error("Order confirmation email failed:", emailErr);
+    }
+
     res.status(201).send({ status: true, data: order, message: "Order placed successfully" });
   } catch (err) {
     res.status(500).send({ status: false, error: (err as Error).message });
@@ -89,8 +96,10 @@ export const getUserOrders = async (req: Request, res: Response) => {
   try {
     const page = Math.max(parseInt((req.query.page as string) || "1", 10), 1);
     const limit = Math.max(parseInt((req.query.limit as string) || "10", 10), 1);
+    const { status } = req.query as Record<string, string>;
 
-    const filter = { user: req.user._id };
+    const filter: Record<string, unknown> = { user: req.user._id };
+    if (status) filter.status = status;
     const [orders, total] = await Promise.all([
       Order.find(filter)
         .sort({ createdAt: -1 })
@@ -113,8 +122,10 @@ export const getFarmerOrders = async (req: Request, res: Response) => {
   try {
     const page = Math.max(parseInt((req.query.page as string) || "1", 10), 1);
     const limit = Math.max(parseInt((req.query.limit as string) || "10", 10), 1);
+    const { status } = req.query as Record<string, string>;
 
-    const filter = { "items.farmer": req.user._id };
+    const filter: Record<string, unknown> = { "items.farmer": req.user._id };
+    if (status) filter.status = status;
     const [orders, total] = await Promise.all([
       Order.find(filter)
         .sort({ createdAt: -1 })

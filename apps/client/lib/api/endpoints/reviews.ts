@@ -1,5 +1,5 @@
 import { api } from "..";
-import { Pagination } from "./products";
+import { Pagination, ProductImage } from "./products";
 
 export interface ReviewUser {
   _id: string;
@@ -8,10 +8,16 @@ export interface ReviewUser {
   profilePicture?: string;
 }
 
+export interface ReviewProduct {
+  _id: string;
+  name: string;
+  images: ProductImage[];
+}
+
 export interface Review {
   _id: string;
   user: ReviewUser | string;
-  product: string;
+  product: ReviewProduct | string;
   order: string;
   rating: number;
   comment: string;

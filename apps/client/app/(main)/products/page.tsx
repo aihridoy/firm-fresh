@@ -215,7 +215,7 @@ export default function Products() {
 
           {/* Products Grid */}
           <div className="lg:col-span-3">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
               <p className="text-gray-600 dark:text-gray-400">
                 {pagination ? `Showing ${rangeStart}-${rangeEnd} of ${pagination.total} products` : ""}
               </p>

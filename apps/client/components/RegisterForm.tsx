@@ -509,7 +509,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Already have an account?{" "}
-          <Link href="/login" className="text-primary-600 hover:text-primary-500 font-medium">
+          <Link href="?auth=login" className="text-primary-600 hover:text-primary-500 font-medium">
             Sign in
           </Link>
         </p>

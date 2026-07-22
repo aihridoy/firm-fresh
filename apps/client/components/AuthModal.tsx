@@ -1,21 +1,21 @@
 "use client";
 
 import { ReactNode } from "react";
-import { useRouter } from "next/navigation";
 
 export default function AuthModal({
   title,
   subtitle,
   maxWidthClass = "max-w-md",
+  onClose,
   children,
 }: {
   title: string;
   subtitle: string;
   maxWidthClass?: string;
+  onClose: () => void;
   children: ReactNode;
 }) {
-  const router = useRouter();
-  const close = () => router.back();
+  const close = onClose;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={close}>

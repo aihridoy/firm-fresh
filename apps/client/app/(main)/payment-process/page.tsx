@@ -23,7 +23,7 @@ export default function PaymentProcess() {
   const user = useAppSelector(selectCurrentUser);
 
   useEffect(() => {
-    if (!isAuthenticated) router.replace("/login");
+    if (!isAuthenticated) router.replace("/?auth=login");
   }, [isAuthenticated, router]);
 
   const { data: productData } = useGetProductByIdQuery(productId as string, { skip: !productId });

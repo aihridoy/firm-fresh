@@ -302,13 +302,13 @@ export default function Navbar() {
                 ) : (
                   <div className="hidden sm:flex items-center space-x-2">
                     <Link
-                      href="/login"
+                      href="?auth=login"
                       className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
                     >
                       Login
                     </Link>
                     <Link
-                      href="/register"
+                      href="?auth=register"
                       className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
                     >
                       Sign Up
@@ -372,14 +372,14 @@ export default function Navbar() {
               {isClient && !isAuthenticated && (
                 <div className="pt-2 border-t border-gray-200 dark:border-gray-700 mt-2 space-y-2">
                   <Link
-                    href="/login"
+                    href="?auth=login"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
                   >
                     Login
                   </Link>
                   <Link
-                    href="/register"
+                    href="?auth=register"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="block px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition text-center"
                   >

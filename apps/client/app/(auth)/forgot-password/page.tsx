@@ -147,7 +147,7 @@ export default function ForgotPassword() {
           {/* Back to Login Link */}
           <div className="mt-6 text-center">
             <Link
-              href="/login"
+              href="?auth=login"
               className="inline-flex items-center text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
             >
               <i className="fas fa-arrow-left mr-2"></i>
@@ -184,7 +184,7 @@ export default function ForgotPassword() {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Don&apos;t have an account?{" "}
             <Link
-              href="/register"
+              href="?auth=register"
               className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
             >
               Create account

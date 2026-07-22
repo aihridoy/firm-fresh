@@ -41,7 +41,7 @@ export default function Cart() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-24 text-center">
         <i className="fas fa-shopping-cart text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">Log in to view your cart</p>
-        <Link href="/login" className="text-primary-600 dark:text-primary-400 hover:underline">
+        <Link href="?auth=login" className="text-primary-600 dark:text-primary-400 hover:underline">
           Go to Login
         </Link>
       </div>

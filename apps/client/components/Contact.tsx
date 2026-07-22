@@ -20,7 +20,7 @@ export default function Contact() {
             Contact Us
           </a>
           <Link
-            href="/register"
+            href="?auth=register"
             className="inline-flex items-center justify-center px-6 py-3 border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900 rounded-lg font-medium transition"
           >
             <i className="fas fa-user-plus mr-2"></i>

@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import { useUpdateUserMutation } from "@/lib/api/endpoints/users";
+import { PanelSkeleton } from "@/components/Skeleton";
 
 const SPECIALIZATIONS = ["vegetables", "fruits", "grains", "dairy", "mixed"];
 const FARM_SIZE_UNITS = ["acres", "hectares", "sq_ft", "sq_m"];
@@ -37,7 +38,7 @@ export default function Profile() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   if (!user) {
-    return <p className="text-center text-gray-500 dark:text-gray-400 py-24">Loading profile...</p>;
+    return <PanelSkeleton />;
   }
 
   const startEditing = () => {

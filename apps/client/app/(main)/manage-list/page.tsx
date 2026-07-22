@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import { useGetFarmerProductsQuery, useTogglePublishMutation, useDeleteProductMutation, Product } from "@/lib/api/endpoints/products";
+import { ProductGridSkeleton } from "@/components/Skeleton";
 
 const PAGE_SIZE = 6;
 
@@ -167,7 +168,9 @@ export default function ManageList() {
           </div>
         </div>
 
-        {isLoading && <p className="text-center text-gray-500 dark:text-gray-400 py-12">Loading your products...</p>}
+        {isLoading && (
+          <ProductGridSkeleton count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" />
+        )}
         {!isLoading && filtered.length === 0 && (
           <p className="text-center text-gray-500 dark:text-gray-400 py-12">No products match your filters.</p>
         )}

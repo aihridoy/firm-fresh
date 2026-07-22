@@ -13,6 +13,7 @@ import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated, selectCurrentUser } from "@/lib/api/endpoints/userSlice";
 import ProductCard from "@/components/ProductCard";
 import ReviewModal from "@/components/ReviewModal";
+import { DetailSkeleton } from "@/components/Skeleton";
 
 function StarRow({ rating, size = "" }: { rating: number; size?: string }) {
   return (
@@ -76,7 +77,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
   const canWriteReview = isAuthenticated && !!deliverableOrder;
 
   if (isLoading) {
-    return <p className="text-center text-gray-500 dark:text-gray-400 py-24">Loading product...</p>;
+    return <DetailSkeleton />;
   }
 
   if (isError || !product) {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
+import { ListSkeleton } from "@/components/Skeleton";
 import {
   useGetUserOrdersQuery,
   useGetFarmerOrdersQuery,
@@ -157,7 +158,7 @@ export default function Bookings() {
           </div>
         </div>
 
-        {isLoading && <p className="text-center text-gray-500 dark:text-gray-400 py-12">Loading orders...</p>}
+        {isLoading && <ListSkeleton rows={3} />}
         {!isLoading && orders.length === 0 && (
           <div className="text-center py-12">
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">No orders found.</p>

@@ -15,6 +15,7 @@ const orderRoutes = require("./routes/orderRoute").default;
 const reviewRoutes = require("./routes/reviewRoute").default;
 const favoriteRoutes = require("./routes/favoriteRoute").default;
 const adminRoutes = require("./routes/adminRoute").default;
+const newsletterRoutes = require("./routes/newsletterRoute").default;
 
 // Middleware
 app.use(helmet());
@@ -34,6 +35,7 @@ app.use("/api/login", authLimiter);
 app.use("/api/register", authLimiter);
 app.use("/api/forgot-password", authLimiter);
 app.use("/api/reset-password", authLimiter);
+app.use("/api/newsletter", authLimiter);
 
 // Connect to database
 connectDB();
@@ -51,6 +53,7 @@ app.use("/api", orderRoutes);
 app.use("/api", reviewRoutes);
 app.use("/api", favoriteRoutes);
 app.use("/api", adminRoutes);
+app.use("/api", newsletterRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {

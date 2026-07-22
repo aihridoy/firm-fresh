@@ -374,6 +374,21 @@ const getAllFarmers = async (req, res) => {
   }
 };
 
+// Public platform stats for the homepage hero
+const getPublicStats = async (req, res) => {
+  try {
+    const { Product } = require("../models/productModel");
+    const [farmers, customers, products] = await Promise.all([
+      User.countDocuments({ userType: "farmer" }),
+      User.countDocuments({ userType: "customer" }),
+      Product.countDocuments({ isPublished: true }),
+    ]);
+    res.send({ status: true, data: { farmers, customers, products } });
+  } catch (err) {
+    res.status(500).send({ status: false, error: err.message });
+  }
+};
+
 // Delete user
 const deleteUser = async (req, res) => {
   try {
@@ -570,6 +585,7 @@ module.exports = {
   updateUser,
   changePassword,
   getAllFarmers,
+  getPublicStats,
   deleteUser,
   forgotPassword,
   refreshAccessToken,

@@ -8,6 +8,7 @@ const {
   updateUser,
   changePassword,
   getAllFarmers,
+  getPublicStats,
   deleteUser,
   upload,
   forgotPassword,
@@ -45,6 +46,9 @@ router.get("/user/email/:email", getUserByEmail);
 
 // Get all farmers (public listing)
 router.get("/farmers", getAllFarmers);
+
+// Public platform stats (homepage hero)
+router.get("/stats", getPublicStats);
 
 // ============================================
 // Protected Routes (Authentication required)

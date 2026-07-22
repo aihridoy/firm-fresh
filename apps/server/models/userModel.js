@@ -91,6 +91,10 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: undefined,
     },
+    refreshToken: {
+      type: String,
+      default: undefined,
+    },
   },
   { timestamps: true }
 );
@@ -125,6 +129,12 @@ userSchema.methods.generateAuthToken = function () {
       expiresIn: "1h",
     }
   );
+};
+
+// Generate refresh token (long-lived, stored on the user document)
+userSchema.methods.generateRefreshToken = function () {
+  const secret = process.env.JWT_REFRESH_SECRET;
+  return jwt.sign({ id: this._id }, secret, { expiresIn: "7d" });
 };
 
 // Generate password reset token

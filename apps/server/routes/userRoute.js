@@ -12,6 +12,8 @@ const {
   upload,
   forgotPassword,
   resetPassword,
+  refreshAccessToken,
+  logout,
   // upload,
 } = require("../controllers/userController");
 const { authMiddleware } = require("../middleware/authMiddleware");
@@ -31,6 +33,12 @@ router.post("/forgot-password", forgotPassword);
 
 // Reset password
 router.post("/reset-password", resetPassword);
+
+// Refresh access token
+router.post("/refresh-token", refreshAccessToken);
+
+// Logout (clear refresh token)
+router.post("/logout", logout);
 
 // Get user by email
 router.get("/user/email/:email", getUserByEmail);

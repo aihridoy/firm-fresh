@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import {
@@ -75,15 +76,34 @@ export default function Bookings() {
   const [addToCart] = useAddToCartMutation();
 
   const handleReorder = async (order: Order) => {
-    for (const item of order.items) {
-      await addToCart({ productId: item.product, quantity: item.quantity });
+    try {
+      for (const item of order.items) {
+        await addToCart({ productId: item.product, quantity: item.quantity }).unwrap();
+      }
+      toast.success("Items added to cart");
+      router.push("/cart");
+    } catch {
+      toast.error("Couldn't reorder - some items may be unavailable.");
     }
-    router.push("/cart");
   };
 
   const handleCancel = async (orderId: string) => {
     if (!window.confirm("Cancel this order?")) return;
-    await cancelOrder(orderId);
+    try {
+      await cancelOrder(orderId).unwrap();
+      toast.success("Order canceled");
+    } catch {
+      toast.error("Couldn't cancel order. Please try again.");
+    }
+  };
+
+  const handleStatusChange = async (orderId: string, status: OrderStatus) => {
+    try {
+      await updateOrderStatus({ id: orderId, status }).unwrap();
+      toast.success(`Order marked as ${status}`);
+    } catch {
+      toast.error("Couldn't update order status.");
+    }
   };
 
   const handleDownload = (order: Order) => {
@@ -250,7 +270,7 @@ export default function Bookings() {
                     {isFarmer ? (
                       <select
                         value={order.status}
-                        onChange={(e) => updateOrderStatus({ id: order._id, status: e.target.value as OrderStatus })}
+                        onChange={(e) => handleStatusChange(order._id, e.target.value as OrderStatus)}
                         className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                       >
                         <option value="pending">Pending</option>

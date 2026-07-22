@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { useGetProductByIdQuery } from "@/lib/api/endpoints/products";
 import { useGetCartQuery } from "@/lib/api/endpoints/cart";
 import { useCreateOrderMutation, PaymentMethod } from "@/lib/api/endpoints/orders";
@@ -92,6 +93,23 @@ export default function PaymentProcess() {
       setError("There's nothing to check out.");
       return;
     }
+    if (paymentMethod === "card") {
+      if (cardNumber.replace(/\s/g, "").length < 12) {
+        setError("Please enter a valid card number.");
+        return;
+      }
+      if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+        setError("Expiry date must be in MM/YY format.");
+        return;
+      }
+      if (cvv.length < 3) {
+        setError("Please enter a valid CVV.");
+        return;
+      }
+    } else if (mobileNumber.trim().length < 10) {
+      setError("Please enter a valid mobile number.");
+      return;
+    }
 
     const paymentDetails =
       paymentMethod === "card"
@@ -105,6 +123,7 @@ export default function PaymentProcess() {
         paymentDetails,
         items: isBuyNow && product ? [{ productId: product._id, quantity }] : undefined,
       }).unwrap();
+      toast.success("Payment successful!");
       router.push(`/success?orderId=${result.data._id}`);
     } catch (err) {
       const message = (err as { data?: { error?: string } })?.data?.error || "Payment failed. Please try again.";

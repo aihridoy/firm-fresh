@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import { useCreateProductMutation, useUpdateProductMutation, useGetProductByIdQuery } from "@/lib/api/endpoints/products";
@@ -91,6 +92,14 @@ export default function AddProduct() {
       setError("Please upload at least one product image.");
       return;
     }
+    if (parseFloat(price) <= 0) {
+      setError("Price must be greater than 0.");
+      return;
+    }
+    if (parseInt(stock, 10) < 0) {
+      setError("Stock cannot be negative.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("name", name);
@@ -107,8 +116,10 @@ export default function AddProduct() {
     try {
       if (editId) {
         await updateProduct({ id: editId, formData }).unwrap();
+        toast.success("Product updated");
       } else {
         await createProduct(formData).unwrap();
+        toast.success("Product added");
       }
       router.push("/manage-list");
     } catch (err) {

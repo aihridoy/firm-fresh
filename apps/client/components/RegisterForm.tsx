@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { useRegisterUserMutation } from "@/lib/api/endpoints/users";
 
 export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
@@ -134,6 +135,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
       }
 
       await registerUser(formDataToSend).unwrap();
+      toast.success("Account created!");
       onSuccess();
     } catch (err: unknown) {
       console.error("Registration failed:", err);

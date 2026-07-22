@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { useGetProductByIdQuery, useGetProductsQuery } from "@/lib/api/endpoints/products";
 import { useGetProductReviewsQuery, useDeleteReviewMutation, Review } from "@/lib/api/endpoints/reviews";
 import { useGetUserOrdersQuery } from "@/lib/api/endpoints/orders";
@@ -104,7 +105,12 @@ export default function ProductDetailsClient({ id }: { id: string }) {
 
   const handleAddToCart = async () => {
     if (requireAuth()) return;
-    await addToCart({ productId: product._id, quantity });
+    try {
+      await addToCart({ productId: product._id, quantity }).unwrap();
+      toast.success(`${product.name} added to cart`);
+    } catch {
+      toast.error("Couldn't add to cart. Please try again.");
+    }
   };
 
   const handleBuyNow = () => {
@@ -114,12 +120,22 @@ export default function ProductDetailsClient({ id }: { id: string }) {
 
   const handleToggleFavorite = async () => {
     if (requireAuth()) return;
-    await toggleFavorite(product._id);
+    try {
+      const result = await toggleFavorite(product._id).unwrap();
+      toast.success(result.favorited ? "Added to favorites" : "Removed from favorites");
+    } catch {
+      toast.error("Couldn't update favorites. Please try again.");
+    }
   };
 
   const handleDeleteReview = async (reviewId: string) => {
     if (!window.confirm("Delete this review?")) return;
-    await deleteReview({ id: reviewId, productId: id });
+    try {
+      await deleteReview({ id: reviewId, productId: id }).unwrap();
+      toast.success("Review deleted");
+    } catch {
+      toast.error("Couldn't delete review.");
+    }
   };
 
   return (

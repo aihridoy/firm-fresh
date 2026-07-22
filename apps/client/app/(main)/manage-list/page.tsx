@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import { useGetFarmerProductsQuery, useTogglePublishMutation, useDeleteProductMutation, Product } from "@/lib/api/endpoints/products";
@@ -58,7 +59,21 @@ export default function ManageList() {
 
   const handleDelete = async (id: string, name: string) => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
-    await deleteProduct(id);
+    try {
+      await deleteProduct(id).unwrap();
+      toast.success(`${name} deleted`);
+    } catch {
+      toast.error("Couldn't delete product. Please try again.");
+    }
+  };
+
+  const handleTogglePublish = async (id: string, isPublished: boolean) => {
+    try {
+      await togglePublish(id).unwrap();
+      toast.success(isPublished ? "Product unpublished" : "Product published");
+    } catch {
+      toast.error("Couldn't update product status.");
+    }
   };
 
   return (
@@ -206,7 +221,7 @@ export default function ManageList() {
                       <i className="fas fa-edit mr-1"></i>Edit
                     </Link>
                     <button
-                      onClick={() => togglePublish(product._id)}
+                      onClick={() => handleTogglePublish(product._id, product.isPublished)}
                       className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
                       aria-label={product.isPublished ? "Unpublish" : "Publish"}
                       title={product.isPublished ? "Unpublish" : "Publish"}

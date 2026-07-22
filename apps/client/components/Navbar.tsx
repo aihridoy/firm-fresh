@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { useTheme } from "@/hooks/use-theme";
 import {
   selectCurrentUser,
@@ -52,6 +53,7 @@ export default function Navbar() {
   const handleLogout = () => {
     const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refreshToken") : null;
     logoutUser(refreshToken);
+    toast.success("Logged out");
     setIsUserMenuOpen(false);
   };
 

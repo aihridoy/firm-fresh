@@ -48,7 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
       <div className="relative">
         <Link href={`/products/${product._id}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -73,7 +73,7 @@ export default function ProductCard({ product }: { product: Product }) {
           </button>
         </div>
       </div>
-      <div className="p-6">
+      <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-center justify-between mb-2">
           <Link href={`/products/${product._id}`}>
             <h3 className="font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition">
@@ -90,7 +90,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
           By {farmer ? `${farmer.firstName} ${farmer.lastName}` : "FarmFresh Farmer"} • {product.farmLocation}
         </p>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 mt-auto">
           <div>
             <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">৳{product.price}</span>
             <span className="text-sm text-gray-500 dark:text-gray-400">/{product.unit}</span>

@@ -27,7 +27,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 antialiased">
+      <body
+        suppressHydrationWarning
+        className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 antialiased"
+      >
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Suspense fallback={<Loading />}>{children}</Suspense>

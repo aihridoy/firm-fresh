@@ -41,7 +41,7 @@ export default function Bookings() {
   const isFarmer = user?.userType === "farmer";
 
   useEffect(() => {
-    if (!isAuthenticated) router.replace("/login");
+    if (!isAuthenticated) router.replace("/?auth=login");
   }, [isAuthenticated, router]);
 
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");

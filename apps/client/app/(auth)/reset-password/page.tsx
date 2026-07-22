@@ -74,7 +74,7 @@ function ResetPasswordForm() {
       if (result.status) {
         setSuccessMessage(result.message || "Password reset successful!");
         setTimeout(() => {
-          router.push("/login");
+          router.push("?auth=login");
         }, 2000);
       } else {
         setErrorMessage(result.error || "Failed to reset password");
@@ -220,7 +220,7 @@ function ResetPasswordForm() {
           {/* Back to Login Link */}
           <div className="mt-6 text-center">
             <Link
-              href="/login"
+              href="?auth=login"
               className="inline-flex items-center text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
             >
               <i className="fas fa-arrow-left mr-2"></i>

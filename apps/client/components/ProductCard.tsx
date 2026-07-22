@@ -23,7 +23,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
-      router.push("/login");
+      router.push("?auth=login");
       return;
     }
     try {
@@ -36,7 +36,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const handleToggleFavorite = async () => {
     if (!isAuthenticated) {
-      router.push("/login");
+      router.push("?auth=login");
       return;
     }
     try {

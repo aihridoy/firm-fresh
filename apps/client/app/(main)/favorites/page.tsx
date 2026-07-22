@@ -16,7 +16,7 @@ export default function FavoritesPage() {
       <div className="text-center py-24">
         <i className="far fa-heart text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">Log in to see your favorites</p>
-        <Link href="/login" className="text-primary-600 dark:text-primary-400 hover:underline">
+        <Link href="?auth=login" className="text-primary-600 dark:text-primary-400 hover:underline">
           Go to Login
         </Link>
       </div>

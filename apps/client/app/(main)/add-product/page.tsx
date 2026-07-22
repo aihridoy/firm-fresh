@@ -56,7 +56,7 @@ export default function AddProduct() {
       router.replace("/");
     }
     if (!isAuthenticated) {
-      router.replace("/login");
+      router.replace("/?auth=login");
     }
   }, [isAuthenticated, user, router]);
 

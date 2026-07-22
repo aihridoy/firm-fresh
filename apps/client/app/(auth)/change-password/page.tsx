@@ -46,7 +46,7 @@ export default function ChangePassword() {
   // Redirect if not authenticated
   useEffect(() => {
     if (isClient && !isAuthenticated) {
-      router.push("/login");
+      router.push("?auth=login");
     }
   }, [isClient, isAuthenticated, router]);
 

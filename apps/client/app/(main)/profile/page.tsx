@@ -18,7 +18,7 @@ export default function Profile() {
   const [updateUser, { isLoading }] = useUpdateUserMutation();
 
   useEffect(() => {
-    if (!isAuthenticated) router.replace("/login");
+    if (!isAuthenticated) router.replace("/?auth=login");
   }, [isAuthenticated, router]);
 
   const [isEditing, setIsEditing] = useState(false);

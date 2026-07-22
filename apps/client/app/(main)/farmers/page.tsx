@@ -147,7 +147,7 @@ export default function FarmersPage() {
             Share your fresh produce with thousands of customers and grow your business
           </p>
           <Link
-            href="/register"
+            href="?auth=register"
             className="inline-block bg-white text-primary-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition"
           >
             Join as Farmer

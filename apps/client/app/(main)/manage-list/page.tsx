@@ -24,7 +24,7 @@ export default function ManageList() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace("/login");
+      router.replace("/?auth=login");
     } else if (user && user.userType !== "farmer") {
       router.replace("/");
     }

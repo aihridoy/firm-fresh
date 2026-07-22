@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Loading from "./loading";
 import { ThemeProvider } from "next-themes";
 import { Providers } from "@/lib/providers";
+import AuthModalHost from "@/components/AuthModalHost";
 
 export const metadata: Metadata = {
   title: {
@@ -34,6 +35,7 @@ export default function RootLayout({
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Suspense fallback={<Loading />}>{children}</Suspense>
+            <AuthModalHost />
           </ThemeProvider>
         </Providers>
       </body>

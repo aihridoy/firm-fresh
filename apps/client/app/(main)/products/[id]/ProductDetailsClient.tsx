@@ -97,7 +97,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
 
   const requireAuth = () => {
     if (!isAuthenticated) {
-      router.push("/login");
+      router.push("?auth=login");
       return true;
     }
     return false;

@@ -27,7 +27,7 @@ export default function AdminUsers() {
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebouncedValue(search, 400);
 
-  const { data, isLoading } = useGetAdminUsersQuery({ page, role, search: debouncedSearch });
+  const { data, isLoading, isFetching } = useGetAdminUsersQuery({ page, role, search: debouncedSearch });
   const [updateUser] = useUpdateAdminUserMutation();
   const [deleteUser] = useDeleteAdminUserMutation();
 
@@ -86,7 +86,7 @@ export default function AdminUsers() {
       {isLoading ? (
         <ListSkeleton rows={4} />
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+        <div className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 transition-opacity ${isFetching ? "opacity-50 pointer-events-none" : ""}`}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

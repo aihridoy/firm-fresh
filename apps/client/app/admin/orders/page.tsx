@@ -22,7 +22,7 @@ export default function AdminOrders() {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useGetAdminOrdersQuery({ page, status: (status || undefined) as OrderStatus | undefined });
+  const { data, isLoading, isFetching } = useGetAdminOrdersQuery({ page, status: (status || undefined) as OrderStatus | undefined });
   const [updateStatus] = useUpdateAdminOrderStatusMutation();
 
   const orders = data?.data ?? [];
@@ -60,7 +60,7 @@ export default function AdminOrders() {
       {isLoading ? (
         <ListSkeleton rows={4} />
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+        <div className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 transition-opacity ${isFetching ? "opacity-50 pointer-events-none" : ""}`}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

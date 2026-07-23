@@ -174,7 +174,9 @@ const addUser = async (req, res) => {
 // Get user by ID
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password -refreshToken -resetPasswordToken -resetPasswordExpires");
+    const user = await User.findById(req.params.id).select(
+      "-password -refreshToken -resetPasswordToken -resetPasswordExpires"
+    );
 
     if (user) {
       return res.send({ status: true, data: user });

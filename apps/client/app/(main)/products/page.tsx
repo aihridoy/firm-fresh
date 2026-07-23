@@ -6,6 +6,7 @@ import { useGetProductsQuery, GetProductsParams } from "@/lib/api/endpoints/prod
 import ProductCard from "@/components/ProductCard";
 import { ProductGridSkeleton } from "@/components/Skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import AdminSelect from "@/app/admin/AdminSelect";
 
 const CATEGORIES = ["vegetables", "fruits", "grains", "dairy", "herbs", "honey"];
 const PRICE_RANGES: Record<string, { minPrice?: number; maxPrice?: number }> = {
@@ -219,16 +220,12 @@ export default function Products() {
               <p className="text-gray-600 dark:text-gray-400">
                 {pagination ? `Showing ${rangeStart}-${rangeEnd} of ${pagination.total} products` : ""}
               </p>
-              <select
-                value={sort}
-                onChange={handleSortChange}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              >
+              <AdminSelect value={sort} onChange={handleSortChange} aria-label="Sort products">
                 <option value="featured">Sort by: Featured</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
                 <option value="newest">Newest First</option>
-              </select>
+              </AdminSelect>
             </div>
 
             {isLoading && (

@@ -10,6 +10,7 @@ import {
 import { useAppSelector } from "@/lib/hooks";
 import { useLogoutUserMutation } from "@/lib/api/endpoints/users";
 import { useGetCartQuery } from "@/lib/api/endpoints/cart";
+import { useGetFavoritesQuery } from "@/lib/api/endpoints/favorites";
 import Link from "next/link";
 import Image from "next/image";
 import NavbarSearch from "@/components/NavbarSearch";
@@ -30,6 +31,8 @@ export default function Navbar() {
 
   const { data: cartData } = useGetCartQuery(undefined, { skip: !isAuthenticated });
   const cartCount = cartData?.data.items.length ?? 0;
+  const { data: favoritesData } = useGetFavoritesQuery(undefined, { skip: !isAuthenticated });
+  const favoritesCount = favoritesData?.data.length ?? 0;
 
   // Ensure component is mounted on client
   useEffect(() => {
@@ -152,10 +155,15 @@ export default function Navbar() {
             {isClient && isAuthenticated && (
               <Link
                 href="/favorites"
-                className="hidden sm:block p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
+                className="relative hidden sm:block p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
                 aria-label="Favorites"
               >
                 <i className="fas fa-heart text-xl"></i>
+                {favoritesCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                    {favoritesCount}
+                  </span>
+                )}
               </Link>
             )}
 

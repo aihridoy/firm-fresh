@@ -32,6 +32,7 @@ export interface Product {
   farmLocation: string;
   harvestDate?: string;
   isPublished: boolean;
+  approvalStatus: "pending" | "approved" | "rejected";
   purchaseCount: number;
   avgRating?: number;
   reviewCount?: number;

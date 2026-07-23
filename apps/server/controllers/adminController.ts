@@ -134,18 +134,85 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
+// ---- Farmer Approval ----
+
+export const listPendingFarmers = async (req: Request, res: Response) => {
+  try {
+    const { page, limit, skip } = pageArgs(req);
+    const { status, search } = req.query as Record<string, string>;
+
+    const filter: Record<string, unknown> = { userType: "farmer" };
+    if (status) filter.approvalStatus = status;
+    else filter.approvalStatus = "pending";
+    if (search) {
+      filter.$or = [
+        { firstName: { $regex: search, $options: "i" } },
+        { lastName: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { "farmerDetails.farmName": { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const [farmers, total] = await Promise.all([
+      User.find(filter, "-password -refreshToken").sort({ createdAt: -1 }).skip(skip).limit(limit),
+      User.countDocuments(filter),
+    ]);
+
+    res.send({ status: true, data: farmers, pagination: paginated(page, limit, total) });
+  } catch (err) {
+    fail(res, err);
+  }
+};
+
+export const approveFarmer = async (req: Request, res: Response) => {
+  try {
+    const farmer = await User.findById(req.params.id);
+    if (!farmer) return res.status(404).send({ status: false, error: "User not found" });
+    if (farmer.userType !== "farmer") {
+      return res.status(400).send({ status: false, error: "User is not a farmer" });
+    }
+
+    farmer.approvalStatus = "approved";
+    await farmer.save();
+
+    const user = await User.findById(farmer._id, "-password -refreshToken");
+    res.send({ status: true, data: user, message: "Farmer approved" });
+  } catch (err) {
+    fail(res, err);
+  }
+};
+
+export const rejectFarmer = async (req: Request, res: Response) => {
+  try {
+    const farmer = await User.findById(req.params.id);
+    if (!farmer) return res.status(404).send({ status: false, error: "User not found" });
+    if (farmer.userType !== "farmer") {
+      return res.status(400).send({ status: false, error: "User is not a farmer" });
+    }
+
+    farmer.approvalStatus = "rejected";
+    await farmer.save();
+
+    const user = await User.findById(farmer._id, "-password -refreshToken");
+    res.send({ status: true, data: user, message: "Farmer rejected" });
+  } catch (err) {
+    fail(res, err);
+  }
+};
+
 // ---- Products ----
 
 export const listAllProducts = async (req: Request, res: Response) => {
   try {
     const { page, limit, skip } = pageArgs(req);
-    const { category, search, published, farmer } = req.query as Record<string, string>;
+    const { category, search, published, farmer, approval } = req.query as Record<string, string>;
 
     const filter: Record<string, unknown> = {};
     if (category) filter.category = category;
     if (farmer) filter.farmer = farmer;
     if (published === "true") filter.isPublished = true;
     if (published === "false") filter.isPublished = false;
+    if (approval) filter.approvalStatus = approval;
     if (search) filter.name = { $regex: search, $options: "i" };
 
     const [products, total] = await Promise.all([
@@ -187,6 +254,60 @@ export const togglePublish = async (req: Request, res: Response) => {
     product.isPublished = !product.isPublished;
     await product.save();
     res.send({ status: true, data: product, message: product.isPublished ? "Product published" : "Product unpublished" });
+  } catch (err) {
+    fail(res, err);
+  }
+};
+
+// ---- Product Approval ----
+
+export const listPendingProducts = async (req: Request, res: Response) => {
+  try {
+    const { page, limit, skip } = pageArgs(req);
+    const { status, search, category } = req.query as Record<string, string>;
+
+    const filter: Record<string, unknown> = {};
+    if (status) filter.approvalStatus = status;
+    else filter.approvalStatus = "pending";
+    if (category) filter.category = category;
+    if (search) filter.name = { $regex: search, $options: "i" };
+
+    const [products, total] = await Promise.all([
+      Product.find(filter).populate("farmer", "firstName lastName email").sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Product.countDocuments(filter),
+    ]);
+
+    res.send({ status: true, data: products, pagination: paginated(page, limit, total) });
+  } catch (err) {
+    fail(res, err);
+  }
+};
+
+export const approveProduct = async (req: Request, res: Response) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).send({ status: false, error: "Product not found" });
+
+    product.approvalStatus = "approved";
+    product.isPublished = true;
+    await product.save();
+
+    res.send({ status: true, data: product, message: "Product approved and published" });
+  } catch (err) {
+    fail(res, err);
+  }
+};
+
+export const rejectProduct = async (req: Request, res: Response) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).send({ status: false, error: "Product not found" });
+
+    product.approvalStatus = "rejected";
+    product.isPublished = false;
+    await product.save();
+
+    res.send({ status: true, data: product, message: "Product rejected" });
   } catch (err) {
     fail(res, err);
   }

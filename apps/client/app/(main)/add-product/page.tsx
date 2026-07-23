@@ -75,6 +75,29 @@ export default function AddProduct() {
     }
   }, [existingProduct]);
 
+  // After all hooks: show message if farmer is not approved
+  if (isAuthenticated && user && user.userType === "farmer" && user.approvalStatus !== "approved") {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+          <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i className="fas fa-clock text-3xl text-yellow-600 dark:text-yellow-400"></i>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Account Pending Approval</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Your farmer account is awaiting admin approval. You will be able to add products once your account is approved.
+          </p>
+          <Link
+            href="/"
+            className="inline-block bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-lg font-medium transition"
+          >
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const toggleFeature = (value: string) => {
     setFeatures((prev) => (prev.includes(value) ? prev.filter((f) => f !== value) : [...prev, value]));
   };

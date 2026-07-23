@@ -6,6 +6,8 @@ import {
   useGetAdminProductsQuery,
   useDeleteAdminProductMutation,
   useToggleAdminProductPublishMutation,
+  useApproveProductMutation,
+  useRejectProductMutation,
   AdminProduct,
 } from "@/lib/api/endpoints/admin";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -19,12 +21,15 @@ export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [published, setPublished] = useState("");
+  const [approval, setApproval] = useState("");
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebouncedValue(search, 400);
 
-  const { data, isLoading } = useGetAdminProductsQuery({ page, category, published, search: debouncedSearch });
+  const { data, isLoading } = useGetAdminProductsQuery({ page, category, published, approval, search: debouncedSearch });
   const [togglePublish] = useToggleAdminProductPublishMutation();
   const [deleteProduct] = useDeleteAdminProductMutation();
+  const [approveProduct] = useApproveProductMutation();
+  const [rejectProduct] = useRejectProductMutation();
 
   const products = data?.data ?? [];
 
@@ -44,6 +49,25 @@ export default function AdminProducts() {
       toast.success("Product deleted");
     } catch (err) {
       toast.error((err as { data?: { error?: string } })?.data?.error ?? "Delete failed");
+    }
+  };
+
+  const handleApprove = async (product: AdminProduct) => {
+    try {
+      await approveProduct(product._id).unwrap();
+      toast.success(`"${product.name}" approved and published`);
+    } catch (err) {
+      toast.error((err as { data?: { error?: string } })?.data?.error ?? "Approval failed");
+    }
+  };
+
+  const handleReject = async (product: AdminProduct) => {
+    if (!window.confirm(`Reject "${product.name}"? It will be hidden from the store.`)) return;
+    try {
+      await rejectProduct(product._id).unwrap();
+      toast.success(`"${product.name}" rejected`);
+    } catch (err) {
+      toast.error((err as { data?: { error?: string } })?.data?.error ?? "Rejection failed");
     }
   };
 
@@ -84,11 +108,24 @@ export default function AdminProducts() {
             setPublished(e.target.value);
             setPage(1);
           }}
-          aria-label="Filter by status"
+          aria-label="Filter by publish status"
         >
-          <option value="">All Status</option>
+          <option value="">All Publish Status</option>
           <option value="true">Published</option>
           <option value="false">Unpublished</option>
+        </AdminSelect>
+        <AdminSelect
+          value={approval}
+          onChange={(e) => {
+            setApproval(e.target.value);
+            setPage(1);
+          }}
+          aria-label="Filter by approval status"
+        >
+          <option value="">All Approval</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
         </AdminSelect>
       </div>
 
@@ -105,7 +142,8 @@ export default function AdminProducts() {
                   <th className="py-2 pr-4">Category</th>
                   <th className="py-2 pr-4">Price</th>
                   <th className="py-2 pr-4">Stock</th>
-                  <th className="py-2 pr-4">Status</th>
+                  <th className="py-2 pr-4">Approval</th>
+                  <th className="py-2 pr-4">Published</th>
                   <th className="py-2">Actions</th>
                 </tr>
               </thead>
@@ -135,6 +173,19 @@ export default function AdminProducts() {
                     <td className="py-2.5 pr-4 text-gray-600 dark:text-gray-400">{product.stock}</td>
                     <td className="py-2.5 pr-4">
                       <span
+                        className={`px-2 py-0.5 rounded-full text-xs capitalize ${
+                          product.approvalStatus === "approved"
+                            ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                            : product.approvalStatus === "rejected"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
+                        }`}
+                      >
+                        {product.approvalStatus}
+                      </span>
+                    </td>
+                    <td className="py-2.5 pr-4">
+                      <span
                         className={`px-2 py-0.5 rounded-full text-xs ${
                           product.isPublished
                             ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
@@ -146,12 +197,30 @@ export default function AdminProducts() {
                     </td>
                     <td className="py-2.5">
                       <div className="flex items-center gap-2 whitespace-nowrap">
-                        <button
-                          onClick={() => handleToggle(product)}
-                          className="px-2 py-1 text-xs text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded transition"
-                        >
-                          {product.isPublished ? "Unpublish" : "Publish"}
-                        </button>
+                        {product.approvalStatus !== "approved" && (
+                          <button
+                            onClick={() => handleApprove(product)}
+                            className="px-2 py-1 text-xs text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition"
+                          >
+                            Approve
+                          </button>
+                        )}
+                        {product.approvalStatus === "pending" && (
+                          <button
+                            onClick={() => handleReject(product)}
+                            className="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                          >
+                            Reject
+                          </button>
+                        )}
+                        {product.approvalStatus === "approved" && (
+                          <button
+                            onClick={() => handleToggle(product)}
+                            className="px-2 py-1 text-xs text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded transition"
+                          >
+                            {product.isPublished ? "Unpublish" : "Publish"}
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDelete(product)}
                           className="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"

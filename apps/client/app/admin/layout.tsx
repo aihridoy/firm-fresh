@@ -10,6 +10,7 @@ import { selectCurrentUser } from "@/lib/api/endpoints/userSlice";
 const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: "fa-chart-line" },
   { href: "/admin/users", label: "Users", icon: "fa-users" },
+  { href: "/admin/farmers", label: "Farmers", icon: "fa-tractor" },
   { href: "/admin/products", label: "Products", icon: "fa-box" },
   { href: "/admin/orders", label: "Orders", icon: "fa-shopping-bag" },
 ];

@@ -67,7 +67,7 @@ export const listProducts = async (req: Request, res: Response) => {
       maxPrice,
     } = req.query as Record<string, string>;
 
-    const filter: Record<string, unknown> = { isPublished: true };
+    const filter: Record<string, unknown> = { isPublished: true, approvalStatus: "approved" };
     if (category) filter.category = category;
     if (farmer) filter.farmer = farmer;
     if (location) filter.farmLocation = { $regex: location, $options: "i" };
@@ -110,7 +110,7 @@ export const listProducts = async (req: Request, res: Response) => {
 
 export const getFeaturedProducts = async (_req: Request, res: Response) => {
   try {
-    const products = await Product.find({ isPublished: true })
+    const products = await Product.find({ isPublished: true, approvalStatus: "approved" })
       .populate("farmer", "firstName lastName farmerDetails")
       .sort({ purchaseCount: -1, createdAt: -1 })
       .limit(8);
@@ -185,9 +185,11 @@ export const createProduct = async (req: Request, res: Response) => {
       features: Array.isArray(features) ? features : features ? [features] : [],
       farmLocation,
       harvestDate: harvestDate || undefined,
+      isPublished: false,
+      approvalStatus: "pending",
     });
 
-    res.status(201).send({ status: true, data: product, message: "Product created successfully" });
+    res.status(201).send({ status: true, data: product, message: "Product submitted for admin review" });
   } catch (err) {
     res.status(500).send({ status: false, error: (err as Error).message });
   }

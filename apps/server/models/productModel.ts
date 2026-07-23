@@ -35,6 +35,7 @@ export interface ProductDocument extends Document {
   farmLocation: string;
   harvestDate?: Date;
   isPublished: boolean;
+  approvalStatus: "pending" | "approved" | "rejected";
   purchaseCount: number;
   createdAt: Date;
   updatedAt: Date;
@@ -69,6 +70,11 @@ const productSchema = new Schema<ProductDocument>(
     farmLocation: { type: String, required: true },
     harvestDate: { type: Date },
     isPublished: { type: Boolean, default: true },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
     purchaseCount: { type: Number, default: 0 },
   },
   { timestamps: true }

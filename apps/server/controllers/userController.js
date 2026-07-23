@@ -131,16 +131,27 @@ const addUser = async (req, res) => {
     const user = new User(userData);
     const savedUser = await user.save();
 
-    // Generate access + refresh tokens
-    const token = savedUser.generateAuthToken();
-    const refreshToken = savedUser.generateRefreshToken();
-    savedUser.refreshToken = refreshToken;
-    await savedUser.save({ validateBeforeSave: false });
-
     // Remove password from response
     const userResponse = savedUser.toObject();
     delete userResponse.password;
     delete userResponse.refreshToken;
+
+    // For farmers: return pending state without tokens
+    if (userType === "farmer") {
+      return res.status(201).send({
+        status: true,
+        data: userResponse,
+        message:
+          "Farmer account created successfully. Your account is pending admin approval. You will be able to list products once approved.",
+        pendingApproval: true,
+      });
+    }
+
+    // For customers: generate tokens and return immediately
+    const token = savedUser.generateAuthToken();
+    const refreshToken = savedUser.generateRefreshToken();
+    savedUser.refreshToken = refreshToken;
+    await savedUser.save({ validateBeforeSave: false });
 
     res.status(201).send({
       status: true,
@@ -360,7 +371,7 @@ const changePassword = async (req, res) => {
 // Get all farmers (for listing farmers)
 const getAllFarmers = async (req, res) => {
   try {
-    const farmers = await User.find({ userType: "farmer" })
+    const farmers = await User.find({ userType: "farmer", approvalStatus: "approved" })
       .select("-password")
       .sort({ createdAt: -1 });
 
@@ -379,9 +390,9 @@ const getPublicStats = async (req, res) => {
   try {
     const { Product } = require("../models/productModel");
     const [farmers, customers, products] = await Promise.all([
-      User.countDocuments({ userType: "farmer" }),
+      User.countDocuments({ userType: "farmer", approvalStatus: "approved" }),
       User.countDocuments({ userType: "customer" }),
-      Product.countDocuments({ isPublished: true }),
+      Product.countDocuments({ isPublished: true, approvalStatus: "approved" }),
     ]);
     res.send({ status: true, data: { farmers, customers, products } });
   } catch (err) {

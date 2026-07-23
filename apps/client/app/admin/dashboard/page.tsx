@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useGetAdminDashboardQuery } from "@/lib/api/endpoints/admin";
+import { useGetAdminDashboardQuery, useGetPendingFarmersQuery, useGetPendingProductsQuery } from "@/lib/api/endpoints/admin";
 import { ListSkeleton } from "@/components/Skeleton";
 
 const STATUS_CLASSES: Record<string, string> = {
@@ -14,15 +14,22 @@ const STATUS_CLASSES: Record<string, string> = {
 
 export default function AdminDashboard() {
   const { data, isLoading } = useGetAdminDashboardQuery();
+  const { data: pendingFarmersData } = useGetPendingFarmersQuery({ status: "pending" });
+  const { data: pendingProductsData } = useGetPendingProductsQuery({ status: "pending" });
   const stats = data?.data;
 
   if (isLoading || !stats) return <ListSkeleton rows={4} />;
+
+  const pendingFarmers = pendingFarmersData?.pagination?.total ?? 0;
+  const pendingProducts = pendingProductsData?.pagination?.total ?? 0;
 
   const cards = [
     { label: "Total Users", value: stats.users.total, icon: "fa-users", color: "text-blue-500" },
     { label: "Customers", value: stats.users.customers, icon: "fa-user", color: "text-teal-500" },
     { label: "Farmers", value: stats.users.farmers, icon: "fa-tractor", color: "text-green-500" },
+    { label: "Pending Farmers", value: pendingFarmers, icon: "fa-clock", color: "text-yellow-500", href: "/admin/farmers" },
     { label: "Products", value: stats.totalProducts, icon: "fa-box", color: "text-orange-500" },
+    { label: "Pending Products", value: pendingProducts, icon: "fa-clock", color: "text-yellow-500", href: "/admin/products" },
     { label: "Orders", value: stats.totalOrders, icon: "fa-shopping-bag", color: "text-purple-500" },
     { label: "Revenue", value: `৳${stats.totalRevenue.toLocaleString()}`, icon: "fa-coins", color: "text-yellow-500" },
   ];
@@ -32,18 +39,27 @@ export default function AdminDashboard() {
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        {cards.map((card) => (
-          <div key={card.label} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{card.value}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {cards.map((card) => {
+          const content = (
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{card.value}</p>
+                </div>
+                <i className={`fas ${card.icon} text-2xl ${card.color}`}></i>
               </div>
-              <i className={`fas ${card.icon} text-2xl ${card.color}`}></i>
             </div>
-          </div>
-        ))}
+          );
+          return card.href ? (
+            <Link key={card.label} href={card.href} className="block hover:opacity-90 transition">
+              {content}
+            </Link>
+          ) : (
+            <div key={card.label}>{content}</div>
+          );
+        })}
       </div>
 
       {/* Recent orders */}

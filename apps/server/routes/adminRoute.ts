@@ -19,12 +19,12 @@ import {
   getOrder,
   updateOrderStatus,
 } from "../controllers/adminController";
-const { authMiddleware, isAdmin } = require("../middleware/authMiddleware");
+const { authMiddleware, isAdmin, blockDemoAdminWrites } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Every /api/admin/* route requires an authenticated admin
-router.use("/admin", authMiddleware, isAdmin);
+// Every /api/admin/* route requires an authenticated admin; demo admin is read-only
+router.use("/admin", authMiddleware, isAdmin, blockDemoAdminWrites);
 
 router.get("/admin/dashboard", getDashboard);
 

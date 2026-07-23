@@ -33,6 +33,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+      {user.email === "admin@demo.com" && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
+            <i className="fas fa-eye text-blue-500"></i>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <span className="font-semibold">Read-only demo:</span> You can explore everything, but changes are disabled for this account.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="flex flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 gap-8">
         {/* Sidebar */}
         <aside className="hidden md:block w-56 flex-shrink-0">

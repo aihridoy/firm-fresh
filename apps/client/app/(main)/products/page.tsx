@@ -51,7 +51,7 @@ export default function Products() {
     ...PRICE_RANGES[searchParams.get("priceKey") || ""],
   };
 
-  const { data, isLoading, isError } = useGetProductsQuery(queryParams);
+  const { data, isLoading, isFetching, isError } = useGetProductsQuery(queryParams);
   const products = data?.data ?? [];
   const pagination = data?.pagination;
 
@@ -239,7 +239,11 @@ export default function Products() {
               <p className="text-center text-gray-500 dark:text-gray-400 py-12">No products match your filters.</p>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity ${
+                isFetching && !isLoading ? "opacity-50 pointer-events-none" : ""
+              }`}
+            >
               {products.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}

@@ -57,7 +57,7 @@ export default function Bookings() {
   const queryArgs = { page, status: statusFilter || undefined };
   const userOrders = useGetUserOrdersQuery(queryArgs, { skip: isFarmer || !isAuthenticated });
   const farmerOrders = useGetFarmerOrdersQuery(queryArgs, { skip: !isFarmer || !isAuthenticated });
-  const { data, isLoading } = isFarmer ? farmerOrders : userOrders;
+  const { data, isLoading, isFetching } = isFarmer ? farmerOrders : userOrders;
 
   const orders = data?.data ?? [];
   const pagination = data?.pagination;
@@ -170,7 +170,7 @@ export default function Bookings() {
           </div>
         )}
 
-        <div className="space-y-6">
+        <div className={`space-y-6 transition-opacity ${isFetching && !isLoading ? "opacity-50 pointer-events-none" : ""}`}>
           {orders.map((order) => {
             const badge = STATUS_BADGES[order.status];
             const currentStepIndex = TIMELINE_STEPS.findIndex((s) => s.status === order.status);

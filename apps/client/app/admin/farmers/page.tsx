@@ -25,7 +25,7 @@ export default function AdminFarmers() {
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebouncedValue(search, 400);
 
-  const { data, isLoading } = useGetPendingFarmersQuery({ page, status, search: debouncedSearch });
+  const { data, isLoading, isFetching } = useGetPendingFarmersQuery({ page, status, search: debouncedSearch });
   const [approveFarmer] = useApproveFarmerMutation();
   const [rejectFarmer] = useRejectFarmerMutation();
 
@@ -85,7 +85,7 @@ export default function AdminFarmers() {
       {isLoading ? (
         <ListSkeleton rows={4} />
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+        <div className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 transition-opacity ${isFetching ? "opacity-50 pointer-events-none" : ""}`}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

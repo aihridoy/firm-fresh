@@ -25,6 +25,15 @@ export interface AdminProductsParams {
   category?: string;
   search?: string;
   published?: string;
+  approval?: string;
+  status?: string;
+}
+
+export interface AdminFarmersParams {
+  page?: number;
+  limit?: number;
+  status?: string;
+  search?: string;
 }
 
 export interface AdminOrdersParams {
@@ -77,6 +86,25 @@ export const adminApi = api.injectEndpoints({
       invalidatesTags: [{ type: "User", id: "ADMIN" }],
     }),
 
+    // ---- Farmer Approval ----
+
+    getPendingFarmers: builder.query<{ status: boolean; data: User[]; pagination: Pagination }, AdminFarmersParams | void>({
+      query: (params) => ({ url: "/admin/farmers/pending", params: toQuery(params ?? undefined) }),
+      providesTags: [{ type: "User", id: "ADMIN" }],
+    }),
+
+    approveFarmer: builder.mutation<{ status: boolean; data: User; message: string }, string>({
+      query: (id) => ({ url: `/admin/farmers/${id}/approve`, method: "PATCH" }),
+      invalidatesTags: [{ type: "User", id: "ADMIN" }],
+    }),
+
+    rejectFarmer: builder.mutation<{ status: boolean; data: User; message: string }, string>({
+      query: (id) => ({ url: `/admin/farmers/${id}/reject`, method: "PATCH" }),
+      invalidatesTags: [{ type: "User", id: "ADMIN" }],
+    }),
+
+    // ---- Products ----
+
     getAdminProducts: builder.query<
       { status: boolean; data: AdminProduct[]; pagination: Pagination },
       AdminProductsParams | void
@@ -92,6 +120,23 @@ export const adminApi = api.injectEndpoints({
 
     toggleAdminProductPublish: builder.mutation<{ status: boolean; data: Product; message: string }, string>({
       query: (id) => ({ url: `/admin/products/${id}/publish`, method: "PATCH" }),
+      invalidatesTags: [{ type: "Product", id: "ADMIN" }, { type: "Product", id: "LIST" }],
+    }),
+
+    // ---- Product Approval ----
+
+    getPendingProducts: builder.query<{ status: boolean; data: AdminProduct[]; pagination: Pagination }, AdminProductsParams | void>({
+      query: (params) => ({ url: "/admin/products/pending", params: toQuery(params ?? undefined) }),
+      providesTags: [{ type: "Product", id: "ADMIN" }],
+    }),
+
+    approveProduct: builder.mutation<{ status: boolean; data: Product; message: string }, string>({
+      query: (id) => ({ url: `/admin/products/${id}/approve`, method: "PATCH" }),
+      invalidatesTags: [{ type: "Product", id: "ADMIN" }, { type: "Product", id: "LIST" }],
+    }),
+
+    rejectProduct: builder.mutation<{ status: boolean; data: Product; message: string }, string>({
+      query: (id) => ({ url: `/admin/products/${id}/reject`, method: "PATCH" }),
       invalidatesTags: [{ type: "Product", id: "ADMIN" }, { type: "Product", id: "LIST" }],
     }),
 
@@ -118,9 +163,15 @@ export const {
   useGetAdminUsersQuery,
   useUpdateAdminUserMutation,
   useDeleteAdminUserMutation,
+  useGetPendingFarmersQuery,
+  useApproveFarmerMutation,
+  useRejectFarmerMutation,
   useGetAdminProductsQuery,
   useDeleteAdminProductMutation,
   useToggleAdminProductPublishMutation,
+  useGetPendingProductsQuery,
+  useApproveProductMutation,
+  useRejectProductMutation,
   useGetAdminOrdersQuery,
   useUpdateAdminOrderStatusMutation,
 } = adminApi;

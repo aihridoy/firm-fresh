@@ -75,6 +75,23 @@ exports.isCustomer = (req, res, next) => {
   next();
 };
 
+// Middleware to check if user is an approved farmer
+exports.isApprovedFarmer = (req, res, next) => {
+  if (req.user.userType !== "farmer") {
+    return res.status(403).send({
+      status: false,
+      error: "Access denied. Only farmers can access this resource.",
+    });
+  }
+  if (req.user.approvalStatus !== "approved") {
+    return res.status(403).send({
+      status: false,
+      error: "Your farmer account is pending admin approval. You cannot create or manage products yet.",
+    });
+  }
+  next();
+};
+
 // Middleware to check if user is an admin
 exports.isAdmin = (req, res, next) => {
   if (req.user.userType !== "admin") {

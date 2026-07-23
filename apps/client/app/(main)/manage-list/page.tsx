@@ -12,6 +12,8 @@ import { ProductGridSkeleton } from "@/components/Skeleton";
 const PAGE_SIZE = 6;
 
 function statusOf(product: Product): { label: string; classes: string } {
+  if (product.approvalStatus === "pending") return { label: "Pending Review", classes: "bg-yellow-500" };
+  if (product.approvalStatus === "rejected") return { label: "Rejected", classes: "bg-red-500" };
   if (!product.isPublished) return { label: "Inactive", classes: "bg-gray-500" };
   if (product.stock === 0) return { label: "Out of Stock", classes: "bg-red-500" };
   if (product.stock <= 10) return { label: "Low Stock", classes: "bg-yellow-500" };
@@ -47,13 +49,34 @@ export default function ManageList() {
       if (category && p.category !== category) return false;
       if (status) {
         const s = statusOf(p).label.toLowerCase().replace(/\s+/g, "-");
-        if (status === "active" && s !== "active") return false;
-        if (status === "inactive" && s !== "inactive") return false;
-        if (status === "out-of-stock" && s !== "out-of-stock") return false;
+        if (s !== status) return false;
       }
       return true;
     });
   }, [data, search, category, status]);
+
+  // After all hooks: show message if farmer is not approved
+  if (isAuthenticated && user && user.userType === "farmer" && user.approvalStatus !== "approved") {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+          <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i className="fas fa-clock text-3xl text-yellow-600 dark:text-yellow-400"></i>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Account Pending Approval</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Your farmer account is awaiting admin approval. You will be able to manage products once your account is approved.
+          </p>
+          <Link
+            href="/"
+            className="inline-block bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-lg font-medium transition"
+          >
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const totalPages = Math.max(Math.ceil(filtered.length / PAGE_SIZE), 1);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -160,6 +183,8 @@ export default function ManageList() {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               >
                 <option value="">All Status</option>
+                <option value="pending-review">Pending Review</option>
+                <option value="rejected">Rejected</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
                 <option value="out-of-stock">Out of Stock</option>
@@ -225,9 +250,10 @@ export default function ManageList() {
                     </Link>
                     <button
                       onClick={() => handleTogglePublish(product._id, product.isPublished)}
-                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
+                      disabled={product.approvalStatus !== "approved"}
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                       aria-label={product.isPublished ? "Unpublish" : "Publish"}
-                      title={product.isPublished ? "Unpublish" : "Publish"}
+                      title={product.approvalStatus !== "approved" ? "Product must be approved first" : product.isPublished ? "Unpublish" : "Publish"}
                     >
                       <i className={`fas ${product.isPublished ? "fa-eye-slash" : "fa-eye"}`}></i>
                     </button>

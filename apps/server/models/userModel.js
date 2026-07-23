@@ -13,6 +13,15 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
 
+    // Approval status (only relevant for farmers)
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: function () {
+        return this.userType === "farmer" ? "pending" : "approved";
+      },
+    },
+
     // Basic info
     firstName: {
       type: String,

@@ -27,6 +27,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState(false);
   const [profilePreview, setProfilePreview] = useState(
     "data:image/svg+xml,%3csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100' height='100' fill='%23e5e7eb'/%3e%3ctext x='50%25' y='50%25' font-size='18' text-anchor='middle' alignment-baseline='middle' fill='%236b7280'%3ePhoto%3c/text%3e%3c/svg%3e"
   );
@@ -134,9 +135,13 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         formDataToSend.append("farmSizeUnit", formData.farmSizeUnit);
       }
 
-      await registerUser(formDataToSend).unwrap();
-      toast.success("Account created!");
-      onSuccess();
+      const result = await registerUser(formDataToSend).unwrap();
+      if (result.pendingApproval) {
+        setPendingApproval(true);
+      } else {
+        toast.success("Account created!");
+        onSuccess();
+      }
     } catch (err: unknown) {
       console.error("Registration failed:", err);
       const errorMessage =
@@ -149,6 +154,30 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <>
+      {pendingApproval ? (
+        <div className="text-center py-8">
+          <div className="mb-6">
+            <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fas fa-clock text-3xl text-yellow-600 dark:text-yellow-400"></i>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Registration Submitted!</h3>
+            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+              Your farmer account has been created and is <span className="font-semibold text-yellow-600 dark:text-yellow-400">pending admin approval</span>.
+            </p>
+            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mt-2">
+              You will be able to list products once your account is approved by an administrator.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onSuccess}
+            className="bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-lg font-medium transition"
+          >
+            Back to Login
+          </button>
+        </div>
+      ) : (
+      <>
       {(validationError || error) && (
         <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
           <p className="text-sm text-red-600 dark:text-red-400">
@@ -514,6 +543,8 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           </Link>
         </p>
       </div>
+    </>
+      )}
     </>
   );
 }

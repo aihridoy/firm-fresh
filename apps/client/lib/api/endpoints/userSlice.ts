@@ -4,6 +4,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export interface User {
   _id: string;
   userType: "customer" | "farmer" | "admin";
+  approvalStatus?: "pending" | "approved" | "rejected";
   firstName: string;
   lastName: string;
   email: string;

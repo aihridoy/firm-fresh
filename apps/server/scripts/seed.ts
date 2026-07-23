@@ -320,6 +320,17 @@ const customers = [
   })),
 ];
 
+const adminUser = {
+  userType: "admin" as const,
+  firstName: "Admin",
+  lastName: "User",
+  email: "admin@farmfresh.test",
+  phone: "01700000000",
+  address: "Dhaka, Bangladesh",
+  password: "Admin123!",
+  approvalStatus: "approved" as const,
+};
+
 // { customer: index into customers, rating, comment } grouped by product name
 const reviewsByProduct: Record<string, { customer: number; rating: number; comment: string }[]> = {
   "Fresh Begun (Eggplant)": [
@@ -1066,7 +1077,7 @@ async function seed() {
   console.log("Creating farmers...");
   const createdFarmers = [];
   for (const farmer of farmers) {
-    const user = await User.create(farmer);
+    const user = await User.create({ ...farmer, approvalStatus: "approved" });
     createdFarmers.push(user);
   }
 
@@ -1076,7 +1087,7 @@ async function seed() {
   for (let i = 0; i < createdFarmers.length; i++) {
     const batch = productsByFarmerIndex[i] || [];
     for (const product of batch) {
-      const created = await Product.create({ ...product, farmer: createdFarmers[i]._id });
+      const created = await Product.create({ ...product, farmer: createdFarmers[i]._id, approvalStatus: "approved", isPublished: true });
       productsByName[product.name] = created;
       count++;
     }
@@ -1087,6 +1098,9 @@ async function seed() {
   for (const customer of customers) {
     createdCustomers.push(await User.create(customer));
   }
+
+  console.log("Creating admin user...");
+  await User.create(adminUser);
 
   console.log("Creating orders and reviews...");
   // One delivered order per customer covering the products they review,

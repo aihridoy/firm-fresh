@@ -1068,7 +1068,7 @@ async function seed() {
   await connectDB();
 
   console.log("Clearing existing seed data...");
-  const seedEmails = [...farmers.map((f) => f.email), ...customers.map((c) => c.email)];
+  const seedEmails = [...farmers.map((f) => f.email), ...customers.map((c) => c.email), adminUser.email];
   const oldSeedUsers = await User.find({ email: { $in: seedEmails } }, "_id");
   await Order.deleteMany({ user: { $in: oldSeedUsers.map((u) => u._id) } });
   await Review.deleteMany({}); // reviews reference reseeded products, so clear all

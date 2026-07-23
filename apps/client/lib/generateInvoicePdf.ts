@@ -32,20 +32,20 @@ export function generateInvoicePdf(order: Order, customerName: string) {
     body: order.items.map((item) => [
       item.productName,
       `${item.quantity} ${item.unit}`,
-      `৳${item.price}`,
-      `৳${(item.price * item.quantity).toFixed(2)}`,
+      `Tk ${item.price}`,
+      `Tk ${(item.price * item.quantity).toFixed(2)}`,
     ]),
     headStyles: { fillColor: [22, 163, 74] },
   });
 
   const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
 
-  doc.text(`Subtotal: ৳${order.subtotal.toFixed(2)}`, 150, finalY, { align: "right" });
-  doc.text(`Delivery Fee: ৳${order.deliveryFee.toFixed(2)}`, 150, finalY + 6, { align: "right" });
-  doc.text(`Service Fee: ৳${order.serviceFee.toFixed(2)}`, 150, finalY + 12, { align: "right" });
+  doc.text(`Subtotal: Tk ${order.subtotal.toFixed(2)}`, 150, finalY, { align: "right" });
+  doc.text(`Delivery Fee: Tk ${order.deliveryFee.toFixed(2)}`, 150, finalY + 6, { align: "right" });
+  doc.text(`Service Fee: Tk ${order.serviceFee.toFixed(2)}`, 150, finalY + 12, { align: "right" });
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text(`Total: ৳${order.totalAmount.toFixed(2)}`, 150, finalY + 20, { align: "right" });
+  doc.text(`Total: Tk ${order.totalAmount.toFixed(2)}`, 150, finalY + 20, { align: "right" });
 
   doc.save(`invoice-${order.orderNumber}.pdf`);
 }

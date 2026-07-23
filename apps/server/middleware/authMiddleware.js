@@ -104,6 +104,18 @@ exports.isAdmin = (req, res, next) => {
   next();
 };
 
+// The public demo admin may look at everything but change nothing.
+// Enforced server-side so a demo token can't mutate via the API directly.
+exports.blockDemoAdminWrites = (req, res, next) => {
+  if (req.user.email === "admin@demo.com" && req.method !== "GET") {
+    return res.status(403).send({
+      status: false,
+      error: "Demo admin is read-only. Changes are disabled for the public demo account.",
+    });
+  }
+  next();
+};
+
 // Middleware to check if user is accessing their own resource
 exports.isOwner = (req, res, next) => {
   const userId = req.params.id || req.params.userId;

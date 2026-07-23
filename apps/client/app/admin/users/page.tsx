@@ -12,7 +12,7 @@ import { selectCurrentUser, User } from "@/lib/api/endpoints/userSlice";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ListSkeleton } from "@/components/Skeleton";
 import Pager from "../Pager";
-import AdminSelect from "../AdminSelect";
+import AdminSelect from "@/components/Select";
 
 const ROLE_CLASSES: Record<string, string> = {
   admin: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",

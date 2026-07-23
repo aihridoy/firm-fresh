@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { useGetAdminOrderQuery, useUpdateAdminOrderStatusMutation } from "@/lib/api/endpoints/admin";
 import { OrderStatus } from "@/lib/api/endpoints/orders";
 import { ListSkeleton } from "@/components/Skeleton";
-import AdminSelect from "../../AdminSelect";
+import AdminSelect from "@/components/Select";
 
 const STATUSES: OrderStatus[] = ["pending", "confirmed", "shipped", "delivered", "canceled"];
 

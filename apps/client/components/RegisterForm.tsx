@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useRegisterUserMutation } from "@/lib/api/endpoints/users";
+import Select from "@/components/Select";
 
 export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   const [registerUser, { isLoading, error }] = useRegisterUserMutation();
@@ -447,13 +448,14 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
                 <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Specialization
                 </label>
-                <select
+                <Select
+                  className="w-full"
+                  selectClassName="pl-3 pr-9 py-2"
                   id="specialization"
                   name="specialization"
                   required
                   value={formData.specialization}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 >
                   <option value="">Select specialization</option>
                   <option value="vegetables">Vegetables</option>
@@ -461,7 +463,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
                   <option value="grains">Grains</option>
                   <option value="dairy">Dairy</option>
                   <option value="mixed">Mixed Farming</option>
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -481,18 +483,19 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
                   className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   placeholder="5.5"
                 />
-                <select
+                <Select
+                  className="w-24"
+                  selectClassName="pl-2 pr-7 py-2 text-sm"
                   id="farmSizeUnit"
                   name="farmSizeUnit"
                   value={formData.farmSizeUnit}
                   onChange={handleChange}
-                  className="w-24 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
                 >
                   <option value="acres">Acres</option>
                   <option value="hectares">Hectares</option>
                   <option value="sq_ft">Sq Ft</option>
                   <option value="sq_m">Sq M</option>
-                </select>
+                </Select>
               </div>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Enter the total area of your farm</p>
             </div>

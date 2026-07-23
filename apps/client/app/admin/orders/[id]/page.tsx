@@ -2,7 +2,6 @@
 
 import { use } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import toast from "react-hot-toast";
 import { useGetAdminOrderQuery, useUpdateAdminOrderStatusMutation } from "@/lib/api/endpoints/admin";
 import { OrderStatus } from "@/lib/api/endpoints/orders";
@@ -80,11 +79,10 @@ export default function AdminOrderDetails({ params }: { params: Promise<{ id: st
                 key={`${item.product}-${item.productName}`}
                 className="flex items-center gap-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3"
               >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element -- product images come from arbitrary hosts */}
+                <img
                   src={item.productImage}
                   alt={item.productName}
-                  width={56}
-                  height={56}
                   className="w-14 h-14 rounded-lg object-cover"
                 />
                 <div className="flex-1 min-w-0">

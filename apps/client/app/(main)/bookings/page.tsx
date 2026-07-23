@@ -41,6 +41,10 @@ export default function Bookings() {
   const user = useAppSelector(selectCurrentUser);
   const isFarmer = user?.userType === "farmer";
 
+  // Avoid SSR/client hydration mismatch: auth state only exists client-side
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     if (!isAuthenticated) router.replace("/?auth=login");
   }, [isAuthenticated, router]);
@@ -55,8 +59,15 @@ export default function Bookings() {
   } | null>(null);
 
   const queryArgs = { page, status: statusFilter || undefined };
-  const userOrders = useGetUserOrdersQuery(queryArgs, { skip: isFarmer || !isAuthenticated });
-  const farmerOrders = useGetFarmerOrdersQuery(queryArgs, { skip: !isFarmer || !isAuthenticated });
+  // refetchOnMountOrArgChange: status may have been updated by admin since last visit
+  const userOrders = useGetUserOrdersQuery(queryArgs, {
+    skip: isFarmer || !isAuthenticated,
+    refetchOnMountOrArgChange: true,
+  });
+  const farmerOrders = useGetFarmerOrdersQuery(queryArgs, {
+    skip: !isFarmer || !isAuthenticated,
+    refetchOnMountOrArgChange: true,
+  });
   const { data, isLoading, isFetching } = isFarmer ? farmerOrders : userOrders;
 
   const orders = data?.data ?? [];
@@ -158,8 +169,8 @@ export default function Bookings() {
           </div>
         </div>
 
-        {isLoading && <ListSkeleton rows={3} />}
-        {!isLoading && orders.length === 0 && (
+        {(!mounted || isLoading) && <ListSkeleton rows={3} />}
+        {mounted && !isLoading && orders.length === 0 && (
           <div className="text-center py-12">
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">No orders found.</p>
             {!isFarmer && (

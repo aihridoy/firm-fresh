@@ -183,6 +183,13 @@ export default function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           >
             <strong>Farmer:</strong> farmer@demo.com / password123
           </button>
+          <button
+            onClick={() => handleDemoLogin("admin@demo.com", "password123")}
+            className="w-full text-left text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 p-2 rounded transition"
+            disabled={isLoading}
+          >
+            <strong>Admin:</strong> admin@demo.com / password123
+          </button>
         </div>
       </div>
     </div>

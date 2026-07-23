@@ -86,7 +86,8 @@ exports.isApprovedFarmer = (req, res, next) => {
   if (req.user.approvalStatus !== "approved") {
     return res.status(403).send({
       status: false,
-      error: "Your farmer account is pending admin approval. You cannot create or manage products yet.",
+      error:
+        "Your farmer account is pending admin approval. You cannot create or manage products yet.",
     });
   }
   next();

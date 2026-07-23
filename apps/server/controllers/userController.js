@@ -141,7 +141,8 @@ const addUser = async (req, res) => {
       return res.status(201).send({
         status: true,
         data: userResponse,
-        message: "Farmer account created successfully. Your account is pending admin approval. You will be able to list products once approved.",
+        message:
+          "Farmer account created successfully. Your account is pending admin approval. You will be able to list products once approved.",
         pendingApproval: true,
       });
     }

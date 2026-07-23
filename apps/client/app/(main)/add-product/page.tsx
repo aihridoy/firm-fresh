@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import { useCreateProductMutation, useUpdateProductMutation, useGetProductByIdQuery } from "@/lib/api/endpoints/products";
+import Select from "@/components/Select";
 
 const CATEGORIES = ["vegetables", "fruits", "grains", "dairy", "herbs", "honey"];
 const UNITS = [
@@ -212,11 +213,12 @@ export default function AddProduct() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category *</label>
-                  <select
+                  <Select
+                    className="w-full"
+                    selectClassName="pl-4 pr-10 py-3"
                     required
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Select Category</option>
                     {CATEGORIES.map((c) => (
@@ -224,7 +226,7 @@ export default function AddProduct() {
                         {c.charAt(0).toUpperCase() + c.slice(1)}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div className="md:col-span-2">
@@ -263,11 +265,12 @@ export default function AddProduct() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Unit *</label>
-                  <select
+                  <Select
+                    className="w-full"
+                    selectClassName="pl-4 pr-10 py-3"
                     required
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Select Unit</option>
                     {UNITS.map((u) => (
@@ -275,7 +278,7 @@ export default function AddProduct() {
                         {u.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div>

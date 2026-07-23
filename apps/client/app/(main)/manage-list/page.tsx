@@ -8,6 +8,7 @@ import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import { useGetFarmerProductsQuery, useTogglePublishMutation, useDeleteProductMutation, Product } from "@/lib/api/endpoints/products";
 import { ProductGridSkeleton } from "@/components/Skeleton";
+import Select from "@/components/Select";
 
 const PAGE_SIZE = 6;
 
@@ -155,13 +156,14 @@ export default function ManageList() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
-              <select
+              <Select
+                className="w-full"
+                selectClassName="pl-3 pr-9 py-2"
                 value={category}
                 onChange={(e) => {
                   setCategory(e.target.value);
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               >
                 <option value="">All Categories</option>
                 <option value="vegetables">Vegetables</option>
@@ -170,17 +172,18 @@ export default function ManageList() {
                 <option value="dairy">Dairy</option>
                 <option value="herbs">Herbs</option>
                 <option value="honey">Honey</option>
-              </select>
+              </Select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
-              <select
+              <Select
+                className="w-full"
+                selectClassName="pl-3 pr-9 py-2"
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               >
                 <option value="">All Status</option>
                 <option value="pending-review">Pending Review</option>
@@ -188,7 +191,7 @@ export default function ManageList() {
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
                 <option value="out-of-stock">Out of Stock</option>
-              </select>
+              </Select>
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ import {
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ListSkeleton } from "@/components/Skeleton";
 import Pager from "../Pager";
-import AdminSelect from "../AdminSelect";
+import AdminSelect from "@/components/Select";
 import { User } from "@/lib/api/endpoints/userSlice";
 
 const STATUS_CLASSES: Record<string, string> = {

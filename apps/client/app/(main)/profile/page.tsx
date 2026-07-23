@@ -8,6 +8,7 @@ import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import { useUpdateUserMutation } from "@/lib/api/endpoints/users";
 import { PanelSkeleton } from "@/components/Skeleton";
+import Select from "@/components/Select";
 
 const SPECIALIZATIONS = ["vegetables", "fruits", "grains", "dairy", "mixed"];
 const FARM_SIZE_UNITS = ["acres", "hectares", "sq_ft", "sq_m"];
@@ -282,18 +283,19 @@ export default function Profile() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Specialization</label>
-                  <select
+                  <Select
+                    className="w-full"
+                    selectClassName="pl-3 pr-9 py-2"
                     required
                     value={specialization}
                     onChange={(e) => setSpecialization(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white capitalize"
                   >
                     {SPECIALIZATIONS.map((s) => (
                       <option key={s} value={s}>
                         {s}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Farm Size</label>
@@ -306,17 +308,18 @@ export default function Profile() {
                       onChange={(e) => setFarmSizeValue(e.target.value)}
                       className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                     />
-                    <select
+                    <Select
+                      className="w-28"
+                      selectClassName="pl-2 pr-7 py-2 text-sm"
                       value={farmSizeUnit}
                       onChange={(e) => setFarmSizeUnit(e.target.value)}
-                      className="w-28 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white text-sm"
                     >
                       {FARM_SIZE_UNITS.map((u) => (
                         <option key={u} value={u}>
                           {u}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                 </div>
               </div>

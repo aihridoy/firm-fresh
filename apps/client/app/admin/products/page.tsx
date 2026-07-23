@@ -13,7 +13,7 @@ import {
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ListSkeleton } from "@/components/Skeleton";
 import Pager from "../Pager";
-import AdminSelect from "../AdminSelect";
+import AdminSelect from "@/components/Select";
 
 const CATEGORIES = ["vegetables", "fruits", "grains", "dairy", "herbs", "honey"];
 

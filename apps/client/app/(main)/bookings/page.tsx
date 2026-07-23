@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/api/endpoints/userSlice";
 import { ListSkeleton } from "@/components/Skeleton";
+import Select from "@/components/Select";
 import {
   useGetUserOrdersQuery,
   useGetFarmerOrdersQuery,
@@ -151,13 +152,13 @@ export default function Bookings() {
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex space-x-3">
-            <select
+            <Select
+              selectClassName="pl-4 pr-10 py-2"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value as OrderStatus | "");
                 setPage(1);
               }}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             >
               <option value="">All Orders</option>
               <option value="pending">Pending</option>
@@ -165,7 +166,7 @@ export default function Bookings() {
               <option value="shipped">Shipped</option>
               <option value="delivered">Delivered</option>
               <option value="canceled">Canceled</option>
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -280,17 +281,17 @@ export default function Bookings() {
                   {/* Actions */}
                   <div className="border-t border-gray-200 dark:border-gray-600 pt-4 mt-4 flex flex-wrap gap-3 items-center">
                     {isFarmer ? (
-                      <select
+                      <Select
+                        selectClassName="pl-4 pr-10 py-2"
                         value={order.status}
                         onChange={(e) => handleStatusChange(order._id, e.target.value as OrderStatus)}
-                        className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                       >
                         <option value="pending">Pending</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="shipped">Shipped</option>
                         <option value="delivered">Delivered</option>
                         <option value="canceled">Canceled</option>
-                      </select>
+                      </Select>
                     ) : (
                       <>
                         <button

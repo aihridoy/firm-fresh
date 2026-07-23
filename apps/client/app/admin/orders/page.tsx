@@ -7,7 +7,7 @@ import { useGetAdminOrdersQuery, useUpdateAdminOrderStatusMutation, AdminOrder }
 import { OrderStatus } from "@/lib/api/endpoints/orders";
 import { ListSkeleton } from "@/components/Skeleton";
 import Pager from "../Pager";
-import AdminSelect from "../AdminSelect";
+import AdminSelect from "@/components/Select";
 
 const STATUSES: OrderStatus[] = ["pending", "confirmed", "shipped", "delivered", "canceled"];
 

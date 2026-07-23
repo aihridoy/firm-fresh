@@ -19,7 +19,12 @@ const newsletterRoutes = require("./routes/newsletterRoute").default;
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+// Only the frontend (and local dev) may call the API from a browser
+app.use(
+  cors({
+    origin: [process.env.FRONTEND_URL, "http://localhost:3000"].filter(Boolean),
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

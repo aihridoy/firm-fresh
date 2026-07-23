@@ -83,12 +83,6 @@ export const usersApi = api.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "User", id }],
     }),
 
-    // Get user by email
-    getUserByEmail: builder.query({
-      query: (email) => `/user/email/${email}`,
-      providesTags: (result, error, email) => [{ type: "User", id: email }],
-    }),
-
     // Get all farmers
     getAllFarmers: builder.query({
       query: () => "/farmers",
@@ -200,7 +194,6 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useGetUserByIdQuery,
-  useGetUserByEmailQuery,
   useGetAllFarmersQuery,
   useUpdateUserMutation,
   useChangePasswordMutation,

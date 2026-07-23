@@ -20,6 +20,9 @@ export const addToCart = async (req: Request, res: Response) => {
     if (!productId) {
       return res.status(400).send({ status: false, error: "productId is required" });
     }
+    if (!Number.isInteger(Number(quantity)) || Number(quantity) < 1) {
+      return res.status(400).send({ status: false, error: "quantity must be a positive integer" });
+    }
 
     const product = await Product.findById(productId);
     if (!product || !product.isPublished) {

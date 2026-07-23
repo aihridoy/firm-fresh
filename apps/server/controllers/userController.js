@@ -171,28 +171,12 @@ const addUser = async (req, res) => {
   }
 };
 
-// Get user by email
-const getUserByEmail = async (req, res) => {
-  try {
-    const user = await User.findOne({ email: req.params.email }).select("-password");
-
-    if (user) {
-      return res.send({ status: true, data: user });
-    }
-
-    res.status(404).send({
-      status: false,
-      error: "User not found",
-    });
-  } catch (err) {
-    res.status(500).send({ status: false, error: err.message });
-  }
-};
-
 // Get user by ID
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await User.findById(req.params.id).select(
+      "-password -refreshToken -resetPasswordToken -resetPasswordExpires"
+    );
 
     if (user) {
       return res.send({ status: true, data: user });
@@ -248,6 +232,8 @@ const login = async (req, res) => {
     const userResponse = user.toObject();
     delete userResponse.password;
     delete userResponse.refreshToken;
+    delete userResponse.resetPasswordToken;
+    delete userResponse.resetPasswordExpires;
 
     res.send({
       status: true,
@@ -265,10 +251,15 @@ const updateUser = async (req, res) => {
     const userId = req.params.id;
     const updates = req.body;
 
-    // Prevent updating sensitive fields directly
+    // Prevent updating sensitive/privileged fields directly
     delete updates.password;
     delete updates.email;
     delete updates._id;
+    delete updates.userType;
+    delete updates.approvalStatus;
+    delete updates.refreshToken;
+    delete updates.resetPasswordToken;
+    delete updates.resetPasswordExpires;
 
     // If updating farmer details, ensure user is a farmer
     const user = await User.findById(userId);
@@ -305,7 +296,7 @@ const updateUser = async (req, res) => {
       userId,
       { $set: updates },
       { new: true, runValidators: true }
-    ).select("-password");
+    ).select("-password -refreshToken -resetPasswordToken -resetPasswordExpires");
 
     res.send({
       status: true,
@@ -372,7 +363,7 @@ const changePassword = async (req, res) => {
 const getAllFarmers = async (req, res) => {
   try {
     const farmers = await User.find({ userType: "farmer", approvalStatus: "approved" })
-      .select("-password")
+      .select("-password -refreshToken -resetPasswordToken -resetPasswordExpires")
       .sort({ createdAt: -1 });
 
     res.send({
@@ -590,7 +581,6 @@ const logout = async (req, res) => {
 // Export all (CommonJS)
 module.exports = {
   addUser,
-  getUserByEmail,
   getUserById,
   login,
   updateUser,

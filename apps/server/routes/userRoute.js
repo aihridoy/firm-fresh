@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const {
   addUser,
-  getUserByEmail,
   getUserById,
   login,
   updateUser,
@@ -17,7 +16,7 @@ const {
   logout,
   // upload,
 } = require("../controllers/userController");
-const { authMiddleware } = require("../middleware/authMiddleware");
+const { authMiddleware, isOwner } = require("../middleware/authMiddleware");
 
 // ============================================
 // Public Routes (No authentication required)
@@ -42,7 +41,6 @@ router.post("/refresh-token", refreshAccessToken);
 router.post("/logout", logout);
 
 // Get user by email
-router.get("/user/email/:email", getUserByEmail);
 
 // Get all farmers (public listing)
 router.get("/farmers", getAllFarmers);
@@ -58,12 +56,12 @@ router.get("/stats", getPublicStats);
 router.get("/user/:id", authMiddleware, getUserById);
 
 // Update user profile (with optional file upload)
-router.put("/user/:id", authMiddleware, upload.single("profilePicture"), updateUser);
+router.put("/user/:id", authMiddleware, isOwner, upload.single("profilePicture"), updateUser);
 
 // Change password
-router.put("/user/:id/password", authMiddleware, changePassword);
+router.put("/user/:id/password", authMiddleware, isOwner, changePassword);
 
 // Delete user
-router.delete("/user/:id", authMiddleware, deleteUser);
+router.delete("/user/:id", authMiddleware, isOwner, deleteUser);
 
 module.exports = router;

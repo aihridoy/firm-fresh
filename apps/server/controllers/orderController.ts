@@ -35,6 +35,9 @@ export const createOrder = async (req: Request, res: Response) => {
     let subtotal = 0;
 
     for (const { productId, quantity } of sourceItems) {
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).send({ status: false, error: "Item quantity must be a positive integer" });
+      }
       const product = await Product.findById(productId);
       if (!product) {
         return res.status(404).send({ status: false, error: `Product ${productId} not found` });

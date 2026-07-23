@@ -320,14 +320,15 @@ const customers = [
   })),
 ];
 
+// Matches the demo-login button in LoginForm
 const adminUser = {
   userType: "admin" as const,
-  firstName: "Admin",
-  lastName: "User",
-  email: "admin@farmfresh.test",
-  phone: "01700000000",
+  firstName: "Demo",
+  lastName: "Admin",
+  email: "admin@demo.com",
+  phone: "01700000001",
   address: "Dhaka, Bangladesh",
-  password: "Admin123!",
+  password: "password123",
   approvalStatus: "approved" as const,
 };
 

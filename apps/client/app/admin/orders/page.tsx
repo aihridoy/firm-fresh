@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import { useGetAdminOrdersQuery, useUpdateAdminOrderStatusMutation, AdminOrder } from "@/lib/api/endpoints/admin";
 import { OrderStatus } from "@/lib/api/endpoints/orders";
@@ -77,8 +78,13 @@ export default function AdminOrders() {
               <tbody>
                 {orders.map((order) => (
                   <tr key={order._id} className="border-b border-gray-100 dark:border-gray-700/50">
-                    <td className="py-2.5 pr-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                      {order.orderNumber}
+                    <td className="py-2.5 pr-4 font-medium whitespace-nowrap">
+                      <Link
+                        href={`/admin/orders/${order._id}`}
+                        className="text-primary-600 dark:text-primary-400 hover:underline"
+                      >
+                        {order.orderNumber}
+                      </Link>
                     </td>
                     <td className="py-2.5 pr-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">
                       {typeof order.user === "object" ? `${order.user.firstName} ${order.user.lastName}` : "—"}

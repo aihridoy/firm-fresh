@@ -43,7 +43,7 @@ export interface AdminOrdersParams {
 }
 
 export type AdminOrder = Omit<Order, "user"> & {
-  user: { _id: string; firstName: string; lastName: string; email: string } | string;
+  user: { _id: string; firstName: string; lastName: string; email: string; phone?: string } | string;
 };
 export type AdminProduct = Omit<Product, "farmer"> & {
   farmer: { _id: string; firstName: string; lastName: string; email: string } | string;
@@ -148,6 +148,11 @@ export const adminApi = api.injectEndpoints({
       providesTags: [{ type: "Order", id: "ADMIN" }],
     }),
 
+    getAdminOrder: builder.query<{ status: boolean; data: AdminOrder }, string>({
+      query: (id) => `/admin/orders/${id}`,
+      providesTags: [{ type: "Order", id: "ADMIN" }],
+    }),
+
     updateAdminOrderStatus: builder.mutation<
       { status: boolean; data: Order; message: string },
       { id: string; status: OrderStatus }
@@ -173,5 +178,6 @@ export const {
   useApproveProductMutation,
   useRejectProductMutation,
   useGetAdminOrdersQuery,
+  useGetAdminOrderQuery,
   useUpdateAdminOrderStatusMutation,
 } = adminApi;

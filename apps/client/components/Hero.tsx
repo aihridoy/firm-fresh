@@ -53,7 +53,7 @@ export default function Hero({ stats }: { stats: PublicStats | null }) {
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     aria-label="Category"
-                    className="w-full appearance-none pl-4 pr-10 py-4 bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-800 sm:border-l border-gray-300 dark:border-gray-600 focus:outline-none capitalize"
+                    className="w-full h-full appearance-none pl-4 pr-10 py-4 bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-800 sm:border-l border-gray-300 dark:border-gray-600 text-lg focus:outline-none capitalize"
                   >
                     <option value="">All Categories</option>
                     {CATEGORIES.map((c) => (

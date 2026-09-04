@@ -7,12 +7,36 @@ import { Providers } from "@/lib/providers";
 import AuthModalHost from "@/components/AuthModalHost";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://firm-fresh.vercel.app"),
   title: {
     default: "FarmFresh — Fresh Produce Direct from Local Farmers",
     template: "%s — FarmFresh",
   },
   description:
     "Buy fresh, farm-direct fruits, vegetables, grains, dairy, honey and herbs from local Bangladeshi farmers on FarmFresh.",
+  openGraph: {
+    type: "website",
+    siteName: "FarmFresh",
+    url: "https://firm-fresh.vercel.app",
+    title: "FarmFresh — Fresh Produce Direct from Local Farmers",
+    description:
+      "Buy fresh, farm-direct fruits, vegetables, grains, dairy, honey and herbs from local Bangladeshi farmers on FarmFresh.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "FarmFresh — connect directly with local farmers for farm-direct produce",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FarmFresh — Fresh Produce Direct from Local Farmers",
+    description:
+      "Buy fresh, farm-direct fruits, vegetables, grains, dairy, honey and herbs from local Bangladeshi farmers on FarmFresh.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({

@@ -12,17 +12,19 @@ import Testimonials from "@/components/Testimonials";
 import TopFarmers from "@/components/TopFarmers";
 import type { Metadata } from "next";
 
-const OG_IMAGE = "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=1200&h=630&fit=crop";
+const OG_IMAGE = "/og-image.png";
 
 export const metadata: Metadata = {
   title: { absolute: "FarmFresh — Fresh Produce Direct from Local Farmers" },
   description:
     "Buy fresh, farm-direct fruits, vegetables, grains, dairy, honey and herbs from local Bangladeshi farmers on FarmFresh.",
   openGraph: {
+    siteName: "FarmFresh",
+    url: "https://firm-fresh.vercel.app",
     title: "FarmFresh — Fresh Produce Direct from Local Farmers",
     description:
       "Buy fresh, farm-direct fruits, vegetables, grains, dairy, honey and herbs from local Bangladeshi farmers on FarmFresh.",
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Fresh produce from FarmFresh" }],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "FarmFresh — connect directly with local farmers for farm-direct produce" }],
     type: "website",
   },
   twitter: {

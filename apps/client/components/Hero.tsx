@@ -3,17 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useGetPublicStatsQuery } from "@/lib/api/endpoints/stats";
+import type { PublicStats } from "@/lib/api/endpoints/stats";
 
 const CATEGORIES = ["vegetables", "fruits", "grains", "dairy", "herbs", "honey"];
 const POPULAR = ["Tomatoes", "Mangoes", "Honey", "Fresh Milk"];
 
-export default function Hero() {
+export default function Hero({ stats }: { stats: PublicStats | null }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
-  const { data: statsData } = useGetPublicStatsQuery();
-  const stats = statsData?.data;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

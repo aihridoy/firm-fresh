@@ -65,7 +65,10 @@ describe("redactDemoPii", () => {
 
     const res = makeRes();
     redactDemoPii(demoReq, res, vi.fn());
-    res.send({ status: true, data: [new FakeDoc({ email: "ada@analytical.com", phone: "01712345678" })] });
+    res.send({
+      status: true,
+      data: [new FakeDoc({ email: "ada@analytical.com", phone: "01712345678" })],
+    });
 
     const body = res.sentBodies[0];
     expect(body.data[0].email).not.toContain("analytical.com");

@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  maskEmail,
-  maskPhone,
-  maskNamePart,
-  maskFullName,
-  redactDeep,
-} from "./redactPii.js";
+import { maskEmail, maskPhone, maskNamePart, maskFullName, redactDeep } from "./redactPii.js";
 
 describe("maskEmail", () => {
   it("keeps the first character and the top-level domain", () => {
@@ -87,9 +81,7 @@ describe("redactDeep", () => {
   it("reaches PII inside a populated sub-document", () => {
     const out = redactDeep({
       status: true,
-      data: [
-        { _id: "o1", total: 500, user: { firstName: "Ada", email: "ada@analytical.com" } },
-      ],
+      data: [{ _id: "o1", total: 500, user: { firstName: "Ada", email: "ada@analytical.com" } }],
     });
 
     expect(out.data[0].user.email).not.toContain("analytical.com");

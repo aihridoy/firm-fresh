@@ -54,7 +54,10 @@ function maskNamePart(value) {
 
 /** "Ada Lovelace" -> "A. L." for a pre-joined full name. */
 function maskFullName(value) {
-  const parts = String(value ?? "").trim().split(/\s+/).filter(Boolean);
+  const parts = String(value ?? "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   if (parts.length === 0) return "";
   return parts.map((p) => `${p[0].toUpperCase()}.`).join(" ");
 }

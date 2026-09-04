@@ -20,11 +20,14 @@ import {
   updateOrderStatus,
 } from "../controllers/adminController";
 const { authMiddleware, isAdmin, blockDemoAdminWrites } = require("../middleware/authMiddleware");
+const { redactDemoPii } = require("../middleware/redactDemoPii");
 
 const router = express.Router();
 
-// Every /api/admin/* route requires an authenticated admin; demo admin is read-only
-router.use("/admin", authMiddleware, isAdmin, blockDemoAdminWrites);
+// Every /api/admin/* route requires an authenticated admin. The public demo
+// admin is additionally read-only, and has personal data masked out of every
+// response it receives.
+router.use("/admin", authMiddleware, isAdmin, blockDemoAdminWrites, redactDemoPii);
 
 router.get("/admin/dashboard", getDashboard);
 

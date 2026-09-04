@@ -3,6 +3,7 @@ import { Product } from "../models/productModel";
 import { Order, ORDER_STATUSES, OrderStatus } from "../models/orderModel";
 import { Review } from "../models/reviewModel";
 const { User } = require("../models/userModel");
+const { DEMO_ADMIN_EMAIL } = require("../middleware/redactDemoPii");
 
 const fail = (res: Response, err: unknown) =>
   res.status(500).send({ status: false, error: (err as Error).message });
@@ -70,10 +71,14 @@ export const listUsers = async (req: Request, res: Response) => {
     const filter: Record<string, unknown> = {};
     if (role) filter.userType = role;
     if (search) {
+      // Masking the email column is not enough on its own: searching an
+      // address and seeing whether a row comes back would confirm that address
+      // is registered. The demo admin therefore searches names only.
+      const isDemoAdmin = req.user?.email === DEMO_ADMIN_EMAIL;
       filter.$or = [
         { firstName: { $regex: search, $options: "i" } },
         { lastName: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
+        ...(isDemoAdmin ? [] : [{ email: { $regex: search, $options: "i" } }]),
       ];
     }
 

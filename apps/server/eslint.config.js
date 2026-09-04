@@ -26,6 +26,16 @@ module.exports = [
     },
   },
   {
+    // Vitest test files are ESM and run through vitest, not the CommonJS
+    // server runtime, so they need module parsing and the test globals.
+    files: ["**/*.test.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: { ...globals.node, ...globals.vitest },
+    },
+  },
+  {
     ignores: ["node_modules/**"],
   },
 ];

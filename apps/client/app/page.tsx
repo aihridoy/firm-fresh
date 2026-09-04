@@ -11,6 +11,7 @@ import SeasonalPicks from "@/components/SeasonalPicks";
 import Testimonials from "@/components/Testimonials";
 import TopFarmers from "@/components/TopFarmers";
 import type { Metadata } from "next";
+import { getPublicStats } from "@/lib/getPublicStats";
 
 const OG_IMAGE = "/og-image.png";
 
@@ -36,11 +37,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const stats = await getPublicStats();
+
   return (
     <>
       <Navbar />
-      <Hero />
+      <Hero stats={stats} />
       <HowItWorks />
       <Categories />
       <TopFarmers />
